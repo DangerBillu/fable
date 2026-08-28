@@ -21,6 +21,7 @@ from runtime.state import (
     FaceRegion,
     VisualFinding,
 )
+from runtime.perception import TelemetryExtractor
 
 
 @dataclass
@@ -29,6 +30,7 @@ class PrivacyFirewall:
     redactor: ImageRedactor
     face_detector: FaceDetector | None = None
     visual_classifier: VisualClassifier | None = None
+    telemetry_extractor: TelemetryExtractor | None = None
     mode: str = "STRICT"
 
     def sanitize(self, observation: RawObservation) -> SanitizedObservation:
@@ -128,6 +130,8 @@ class PrivacyFirewall:
         face_count: int = 0,
         visual_findings_count: int = 0,
     ) -> SanitizedState:
+        extractor = self.telemetry_extractor or TelemetryExtractor()
+        telemetry, ui_state = extractor.extract(dom.visible_text, dom.elements)
         return SanitizedState(
             page={"title": dom.title, "domain": dom.domain},
             elements=tuple(
@@ -152,6 +156,8 @@ class PrivacyFirewall:
                 "face_count": face_count,
                 "visual_findings": visual_findings_count,
             },
+            telemetry=telemetry,
+            ui_state=ui_state,
         )
 
     def _unknown_category(self):
@@ -169,4 +175,3 @@ def first_nonempty(*values: str | None) -> str | None:
 
 def visible_safe_title(title: str) -> str:
     return title.replace("\n", " ").strip()[:120]
-

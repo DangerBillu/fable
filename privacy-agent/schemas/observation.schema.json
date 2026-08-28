@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "required": ["schema_version", "timestamp", "source", "telemetry", "ui_state", "safe_text", "redactions"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "timestamp": {"type": "string"},
+    "source": {"type": "object"},
+    "telemetry": {"type": "object"},
+    "ui_state": {"type": "object"},
+    "safe_text": {"type": "array"},
+    "redactions": {"type": "array"}
+  }
+}

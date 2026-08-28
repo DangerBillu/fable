@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "required": ["action_id", "action", "parameters", "reason"],
+  "properties": {
+    "action_id": {"type": "string"},
+    "action": {"enum": ["browser.get_page", "browser.get_dom", "browser.get_screenshot", "browser.click", "browser.type", "browser.scroll", "browser.press_key", "browser.navigate", "browser.select", "browser.go_back", "browser.wait", "browser.done"]},
+    "parameters": {"type": "object"},
+    "reason": {"type": "string"}
+  }
+}

@@ -128,5 +128,6 @@ def state_to_dict(state: SanitizedState) -> dict:
         "elements": list(state.elements),
         "visible_text": state.visible_text,
         "privacy": state.privacy,
+        "telemetry": state.telemetry,
+        "ui_state": state.ui_state,
     }
-

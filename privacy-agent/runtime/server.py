@@ -19,6 +19,7 @@ from agent.ollama import OllamaClient
 from agent.planner import Planner
 from mcp.gateway import McpGateway
 from runtime.audit import AuditLogger
+from runtime.perception import TelemetryExtractor
 from runtime.policy import PolicyEngine
 from runtime.privacy import FaceDetector, ImageRedactor, PrivacyDetector, PrivacyFirewall, VisualClassifier
 from runtime.state import DomElement, FaceRegion, RawDom, RawObservation, RawScreenshot
@@ -98,6 +99,7 @@ loop = AgentLoop(
         redactor=ImageRedactor(),
         face_detector=face_detector,
         visual_classifier=visual_classifier,
+        telemetry_extractor=TelemetryExtractor(),
         mode=os.getenv("PRIVACY_MODE", "STRICT"),
     ),
     planner=Planner(ollama=ollama_client, hf_client=hf_client),
@@ -172,5 +174,4 @@ if __name__ == "__main__":
 
     port = int(os.getenv("PORT", os.getenv("RUNTIME_PORT", "8000")))
     uvicorn.run(app, host="127.0.0.1", port=port)
-
 

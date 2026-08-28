@@ -160,6 +160,8 @@ class SanitizedState:
     elements: tuple[dict[str, Any], ...]
     visible_text: str
     privacy: dict[str, Any]
+    telemetry: dict[str, Any] = field(default_factory=dict)
+    ui_state: dict[str, Any] = field(default_factory=dict)
     _sanitized_marker: Literal["SANITIZED_STATE"] = "SANITIZED_STATE"
 
 
@@ -193,4 +195,3 @@ class ApprovedAction:
     request: ActionRequest
     decision: PolicyDecision
     approval_id: str | None = None
-

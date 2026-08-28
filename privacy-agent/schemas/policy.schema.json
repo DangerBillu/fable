@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "required": ["allowed_actions", "require_approval_for"],
+  "properties": {
+    "allowed_actions": {"type": "array"},
+    "require_approval_for": {"type": "array"},
+    "blocked_domains": {"type": "array"},
+    "allowed_domains": {"type": "array"}
+  }
+}

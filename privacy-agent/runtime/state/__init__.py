@@ -18,6 +18,7 @@ from .types import (
     SensitiveRegion,
     VisualFinding,
 )
+from .diff_engine import TemporalDiffEngine
 
 __all__ = [
     "ActionRequest",
@@ -38,6 +39,6 @@ __all__ = [
     "SensitiveFinding",
     "SensitiveRegion",
     "VisualFinding",
+    "TemporalDiffEngine",
 ]
-
 
