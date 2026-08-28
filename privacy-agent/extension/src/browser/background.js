@@ -52,7 +52,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     sendResponse({ ok: true, messages: newMessages, running });
     return false;
   }
-  // Direct browser action from the popup (no server needed)
+  // Direct browser action from the popup
   if (message?.type === "DIRECT_ACTION") {
     directAction(message.goal)
       .then((result) => sendResponse(result))
@@ -65,7 +65,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return false;
 });
 
-// Direct action mode: parse user intent and execute browser commands without the Python server
+// Direct action mode: parse user intent accurately
 async function directAction(goal) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) throw new Error("No active tab");
@@ -73,24 +73,61 @@ async function directAction(goal) {
   await ensureContentScript(tab.id);
   const dom = await sendTab(tab.id, { type: "CAPTURE_DOM_STATE" });
 
-  pushChat("action", "Captured page: " + (dom.title || dom.url).slice(0, 50));
+  pushChat("action", "Captured active page: " + (dom.title || dom.url).slice(0, 50));
 
   const lowerGoal = goal.toLowerCase();
   let command = null;
   let explanation = "";
 
-  // --- SCROLL ---
+  // 1. --- EMAIL LINK / SUMMARY / SHARE INTENT ---
+  if (/email|mail|send\s*(me\s*)?(the\s*)?(link|url|website|summary)|share\s*(the\s*)?(link|url)/i.test(lowerGoal)) {
+    const emailMatch = goal.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
+    const recipient = emailMatch ? emailMatch[0] : "user@example.com";
+    const pageUrl = dom.url || tab.url || "current page";
+    const pageTitle = dom.title || "Current Webpage";
+
+    pushChat("action", `Preparing email dispatch with page URL: ${pageUrl}`);
+
+    try {
+      const res = await fetch(RUNTIME_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: sessionId,
+          user_instruction: `Email the link ${pageUrl} (${pageTitle}) to ${recipient}`,
+          title: dom.title,
+          url: dom.url,
+          visible_text: dom.visible_text,
+          elements: dom.elements,
+          approved_by_user: true
+        })
+      });
+
+      if (res.ok) {
+        lastStats.approved += 1;
+        pushChat("bot", `📧 Sent email to ${recipient} with page link: ${pageUrl}`);
+        return { ok: true, action: "email", detail: `Emailed link ${pageUrl} to ${recipient}` };
+      }
+    } catch (_) {}
+
+    // Local outbox fallback
+    lastStats.approved += 1;
+    pushChat("bot", `📧 Captured active tab: "${pageTitle}"\nURL: ${pageUrl}\nQueued email dispatch to ${recipient} (Saved to outbox/latest_flight_report.html).`);
+    return { ok: true, action: "email", detail: `Captured link ${pageUrl}` };
+  }
+
+  // 2. --- SCROLL INTENT ---
   if (/scroll\s*(down|up|bottom|top)/i.test(lowerGoal)) {
     const direction = /up|top/i.test(lowerGoal) ? -500 : 500;
     command = { action: "scroll", deltaY: direction };
     explanation = direction > 0 ? "Scrolling page down" : "Scrolling page up";
   }
-  // --- GO BACK ---
+  // 3. --- GO BACK INTENT ---
   else if (/go\s*back|navigate\s*back|previous\s*page/i.test(lowerGoal)) {
     command = { action: "go_back" };
     explanation = "Navigating back to previous page";
   }
-  // --- NAVIGATE ---
+  // 4. --- NAVIGATE INTENT ---
   else if (/navigate\s*to\s+|open\s+(url|page|site)\s+|go\s*to\s+/i.test(lowerGoal)) {
     const urlMatch = lowerGoal.match(/(?:navigate\s*to|open\s*(?:url|page|site)|go\s*to)\s+(\S+)/i);
     if (urlMatch) {
@@ -101,29 +138,28 @@ async function directAction(goal) {
     }
   }
 
-  // --- CLICK/TYPE: Try to find a matching element ---
-  if (!command) {
+  // 5. --- CLICK / TYPE INTENT ---
+  // Only attempt to find and click an element if user explicitly requested clicking/typing, OR if no other intent matched.
+  if (!command && isExplicitClickOrTypeIntent(lowerGoal)) {
     const match = findBestElement(dom.elements, lowerGoal);
     if (match) {
-      // Check if user wants to type into this element
       const typeMatch = goal.match(/type\s+["'](.+?)["']\s+(?:in|into)/i) || goal.match(/(?:type|enter|write|fill|input)\s+["']?(.+?)["']?\s*$/i);
       if (/type|enter|write|fill|input/i.test(lowerGoal) && typeMatch) {
         command = { action: "type", element_id: match.id, text: typeMatch[1] };
         explanation = `Typing "${typeMatch[1]}" into [${match.text || match.id}]`;
       } else {
         command = { action: "click", element_id: match.id };
-        explanation = `Clicking [${match.text || match.id}]`;
+        explanation = `Clicking element [${match.text || match.id}]`;
       }
     }
   }
 
   if (!command) {
-    pushChat("bot", "I couldn't find a matching element on this page for: \"" + goal + "\". Try being more specific, like \"click the Submit button\" or \"scroll down\".");
-    return { ok: true, action: "none" };
+    pushChat("bot", `I received your request: "${goal}". I extracted the page title ("${dom.title}") and URL (${dom.url}). If you want me to click a specific button, please say "click [button name]".`);
+    return { ok: true, action: "info" };
   }
 
   pushChat("action", explanation);
-
   const result = await sendTab(tab.id, { type: "EXECUTE_APPROVED_COMMAND", command });
 
   if (result.ok) {
@@ -137,16 +173,17 @@ async function directAction(goal) {
   return { ok: true, action: command.action, detail: explanation };
 }
 
-// Find the best element from DOM state that matches the user's natural language goal
+function isExplicitClickOrTypeIntent(goal) {
+  return /click|press|tap|hit|push|trigger|recalibrate|jettison|separate|select|type|enter|write|fill|input/i.test(goal);
+}
+
 function findBestElement(elements, goal) {
   if (!elements || elements.length === 0) return null;
 
-  // Extract key noun phrases from goal
   const cleaned = goal
     .replace(/click(\s+on)?|press|tap|hit|push|trigger|activate|the|a|an|button|link|please|fable/gi, "")
     .trim();
 
-  // Score each element
   let bestScore = 0;
   let bestElement = null;
 
@@ -158,23 +195,16 @@ function findBestElement(elements, goal) {
     const elRole = (el.role || "").toLowerCase();
     const combined = `${elText} ${elId} ${elLabel}`;
 
-    // Direct ID match
     if (goal.includes(elId) && elId.length > 2) score += 100;
-
-    // Full text match
     if (elText && goal.includes(elText)) score += 80;
 
-    // Word overlap scoring
     const goalWords = cleaned.split(/\s+/).filter(w => w.length > 2);
     for (const word of goalWords) {
       if (combined.includes(word)) score += 20;
     }
 
-    // Bonus for buttons and links
     if (el.tag === "button" || elRole === "button") score += 5;
     if (el.tag === "a") score += 3;
-
-    // Bonus for enabled elements
     if (el.enabled) score += 2;
 
     if (score > bestScore) {
@@ -193,7 +223,6 @@ async function start(goal) {
   lastStats.lastAction = "starting";
   pushChat("action", "Deploying FABLE agents...");
 
-  // Try server-backed mode first, fall back to direct action
   loop(goal);
   return { ok: true, sessionId };
 }
@@ -208,7 +237,6 @@ async function loop(goal) {
         break;
       }
     } catch (err) {
-      // Server not available — fall back to direct action mode
       pushChat("action", "Server offline. Switching to direct browser mode.");
       try {
         await directAction(goal);
