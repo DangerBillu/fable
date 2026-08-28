@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Privacy Agent</title>
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>PRIVACY AGENT</h1>
+        <span id="status">Protected</span>
+      </header>
+      <label>
+        Goal
+        <input id="goal" value="Open the settings page." />
+      </label>
+      <div class="mode">
+        <span>Current mode</span>
+        <strong>STRICT</strong>
+      </div>
+      <section class="checks">
+        <div>DOM</div><div>local</div>
+        <div>OCR</div><div>local optional</div>
+        <div>Privacy detection</div><div>local</div>
+        <div>Redaction</div><div>local</div>
+        <div>Ollama</div><div>localhost</div>
+        <div>MCP</div><div>policy gated</div>
+      </section>
+      <section class="stats">
+        <div><span>Screenshots</span><strong id="screenshots">0</strong></div>
+        <div><span>Redacted</span><strong id="redacted">0</strong></div>
+        <div><span>Tokenized</span><strong id="tokenized">0</strong></div>
+        <div><span>Blocked</span><strong id="blocked">0</strong></div>
+        <div><span>Approved</span><strong id="approved">0</strong></div>
+      </section>
+      <section class="boundary">
+        <div><strong>RAW DATA</strong><span>LOCAL ONLY</span></div>
+        <div><strong>SANITIZED DATA</strong><span>SENT TO REASONING MODEL</span></div>
+      </section>
+      <footer>
+        <button id="start">Start</button>
+        <button id="stop">Kill Agent</button>
+      </footer>
+    </main>
+    <script src="dashboard.js"></script>
+  </body>
+</html>
+

@@ -1,0 +1,26 @@
+{
+  "mode": "STRICT",
+  "classification_levels": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "RESTRICTED", "SECRET"],
+  "disabled_tools": [],
+  "blocked_domains": [],
+  "allowed_domains": [],
+  "require_approval_for_all": false,
+  "actions": {
+    "browser.click": "ALLOW",
+    "browser.scroll": "ALLOW",
+    "browser.go_back": "ALLOW",
+    "browser.navigate": "REQUIRE_USER_APPROVAL",
+    "browser.type": "REQUIRE_USER_APPROVAL",
+    "browser.select": "REQUIRE_USER_APPROVAL",
+    "browser.get_screenshot": "ALLOW_SANITIZED_ONLY"
+  },
+  "emergency_controls": {
+    "kill_agent": true,
+    "disable_screen_capture": true,
+    "disable_specific_tools": true,
+    "disable_specific_domains": true,
+    "block_uploads": true,
+    "block_downloads": true
+  }
+}
+

@@ -1,0 +1,123 @@
+body {
+  margin: 0;
+  width: 360px;
+  font: 13px/1.4 system-ui, -apple-system, Segoe UI, sans-serif;
+  color: #19201d;
+  background: #f7f8f5;
+}
+
+main {
+  padding: 14px;
+}
+
+header,
+footer,
+.mode,
+.boundary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+#status {
+  padding: 3px 8px;
+  border-radius: 8px;
+  color: #083d20;
+  background: #d8f0df;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  margin: 14px 0;
+  font-weight: 600;
+}
+
+input {
+  min-height: 34px;
+  border: 1px solid #bbc5be;
+  border-radius: 6px;
+  padding: 0 9px;
+  font: inherit;
+}
+
+.mode,
+.checks,
+.stats,
+.boundary {
+  margin-top: 12px;
+  border-top: 1px solid #dce2dc;
+  padding-top: 12px;
+}
+
+.checks {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 7px 16px;
+}
+
+.checks div:nth-child(even) {
+  color: #38604a;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.stats div {
+  min-height: 54px;
+  border: 1px solid #dce2dc;
+  border-radius: 8px;
+  padding: 6px;
+  background: white;
+}
+
+.stats span,
+.boundary span {
+  display: block;
+  color: #617169;
+  font-size: 11px;
+}
+
+.stats strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 18px;
+}
+
+.boundary div {
+  flex: 1;
+  border: 1px solid #dce2dc;
+  border-radius: 8px;
+  padding: 8px;
+  background: white;
+}
+
+footer {
+  margin-top: 14px;
+}
+
+button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 14px;
+  color: white;
+  background: #1f6a43;
+  font: inherit;
+  font-weight: 700;
+}
+
+#stop {
+  background: #8d2929;
+}
+

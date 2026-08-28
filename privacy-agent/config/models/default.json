@@ -1,0 +1,22 @@
+{
+  "reasoning": {
+    "provider": "ollama",
+    "base_url": "http://127.0.0.1:11434",
+    "model": "qwen3:8b",
+    "version": null,
+    "sha256": null,
+    "auto_download": false
+  },
+  "ocr": {
+    "provider": "local-tesseract",
+    "enabled": true
+  },
+  "vision": {
+    "enabled": false,
+    "model": null,
+    "version": null,
+    "sha256": null,
+    "invoke_only_when_ambiguous": true
+  }
+}
+
