@@ -42,7 +42,7 @@
         "recipient": "arnav.goyal0713@gmail.com",
         "subject": "FABLE / ISRO LVM3-M4 Launch Telemetry & Flight Test Report",
         "smtp_sent": false,
-        "smtp_error": "(535, b'5.7.8 Username and Password not accepted. For more information, go to\\n5.7.8  https://support.google.com/mail/?p=BadCredentials a92af1059eb24-142e41837c6sm4125417c88.11 - gsmtp')",
+        "smtp_error": "(535, b'5.7.8 Username and Password not accepted. For more information, go to\\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5a478bee46e88-3286f959575sm6446779eec.15 - gsmtp')",
         "outbox_html": "C:\\Users\\yousi\\OneDrive\\Documents\\fable\\privacy-agent\\outbox\\latest_flight_report.html",
         "outbox_eml": "C:\\Users\\yousi\\OneDrive\\Documents\\fable\\privacy-agent\\outbox\\latest_flight_report.eml",
         "status": "saved_to_outbox"
