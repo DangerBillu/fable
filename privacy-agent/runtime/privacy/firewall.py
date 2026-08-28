@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 
 from runtime.privacy.detectors import PrivacyDetector
 from runtime.privacy.redactor import ImageRedactor
+from runtime.privacy.face_detector import FaceDetector
+from runtime.privacy.visual_classifier import VisualClassifier
 from runtime.state import (
     ClassificationLevel,
     DomElement,
@@ -15,6 +17,9 @@ from runtime.state import (
     SanitizedState,
     SensitiveFinding,
     SensitiveRegion,
+    SensitiveCategory,
+    FaceRegion,
+    VisualFinding,
 )
 
 
@@ -22,6 +27,8 @@ from runtime.state import (
 class PrivacyFirewall:
     detector: PrivacyDetector
     redactor: ImageRedactor
+    face_detector: FaceDetector | None = None
+    visual_classifier: VisualClassifier | None = None
     mode: str = "STRICT"
 
     def sanitize(self, observation: RawObservation) -> SanitizedObservation:
@@ -42,11 +49,41 @@ class PrivacyFirewall:
             visible_text = "\n".join(part for part in [visible_text, ocr_text] if part)
             findings.extend(ocr_findings)
 
+        merged_face_regions = []
+        visual_findings_list = []
         screenshot = None
+
         if observation.raw_screenshot:
             try:
-                image, width, height = self.redactor.redact_data_url(observation.raw_screenshot.data_url, tuple(regions))
-                screenshot = SanitizedScreenshot(image, width, height, len(regions))
+                import base64
+                _, payload = observation.raw_screenshot.data_url.split(",", 1)
+                image_bytes = base64.b64decode(payload, validate=True)
+                
+                if self.face_detector:
+                    server_faces = self.face_detector.detect_faces(image_bytes)
+                    merged_face_regions = self.face_detector.merge_face_regions(observation.face_regions, server_faces)
+                else:
+                    merged_face_regions = list(observation.face_regions)
+                    
+                if self.visual_classifier:
+                    visual_findings_list = self.visual_classifier.classify(image_bytes)
+                    
+                for face in merged_face_regions:
+                    regions.append(SensitiveRegion(
+                        category=SensitiveCategory.FACE,
+                        classification=ClassificationLevel.RESTRICTED,
+                        bbox=(face.x, face.y, face.width, face.height),
+                        confidence=face.confidence,
+                        source="vision",
+                    ))
+
+                image_base64, width, height, total_redactions = self.redactor.redact_full(
+                    observation.raw_screenshot.data_url, 
+                    tuple(regions), 
+                    tuple(merged_face_regions), 
+                    tuple(visual_findings_list)
+                )
+                screenshot = SanitizedScreenshot(image_base64, width, height, total_redactions)
             except Exception:
                 if self.mode.upper() == "DEBUG":
                     raise
@@ -69,7 +106,7 @@ class PrivacyFirewall:
             elements=tuple(sanitized_elements),
             visible_text=visible_text,
         )
-        state = self._state_from_dom(sanitized_dom, findings, regions, screenshot)
+        state = self._state_from_dom(sanitized_dom, findings, regions, screenshot, len(merged_face_regions), len(visual_findings_list))
         assert state._sanitized_marker == "SANITIZED_STATE"
         return SanitizedObservation(
             session_id=observation.session_id,
@@ -78,6 +115,8 @@ class PrivacyFirewall:
             sensitive_regions=tuple(regions),
             sensitive_findings=tuple(findings),
             state=state,
+            face_count=len(merged_face_regions),
+            visual_findings_count=len(visual_findings_list),
         )
 
     def _state_from_dom(
@@ -86,6 +125,8 @@ class PrivacyFirewall:
         findings: list[SensitiveFinding],
         regions: list[SensitiveRegion],
         screenshot: SanitizedScreenshot | None,
+        face_count: int = 0,
+        visual_findings_count: int = 0,
     ) -> SanitizedState:
         return SanitizedState(
             page={"title": dom.title, "domain": dom.domain},
@@ -108,6 +149,8 @@ class PrivacyFirewall:
                 "redacted": screenshot.redaction_count if screenshot else 0,
                 "categories": sorted({finding.category.value for finding in findings}),
                 "raw_data_local_only": True,
+                "face_count": face_count,
+                "visual_findings": visual_findings_count,
             },
         )
 

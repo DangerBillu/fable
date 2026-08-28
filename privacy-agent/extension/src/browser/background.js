@@ -1,3 +1,5 @@
+import { screenAnalyzer } from '../capture/screen_analyzer.js';
+
 const RUNTIME_URL = "http://127.0.0.1:8000/agent/step";
 const MAX_STEPS = 12;
 
@@ -12,6 +14,7 @@ let lastStats = {
   tokenized: 0,
   blocked: 0,
   approved: 0,
+  facesBlurred: 0,
   lastAction: "idle"
 };
 
@@ -63,8 +66,22 @@ async function runStep(goal) {
   }
   await ensureContentScript(tab.id);
   const dom = await sendTab(tab.id, { type: "CAPTURE_DOM_STATE" });
-  const screenshotDataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
+  const rawScreenshotDataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
   lastStats.screenshots += 1;
+
+  let finalScreenshot = rawScreenshotDataUrl;
+  let faceRegions = [];
+
+  try {
+    const analysis = await screenAnalyzer.analyze(rawScreenshotDataUrl, dom);
+    finalScreenshot = analysis.redactedScreenshot;
+    faceRegions = analysis.faceRegions;
+    if (analysis.stats.facesBlurred > 0) {
+      lastStats.facesBlurred += analysis.stats.facesBlurred;
+    }
+  } catch (err) {
+    console.warn("Screen analysis failed, falling back to raw screenshot", err);
+  }
 
   const response = await fetch(RUNTIME_URL, {
     method: "POST",
@@ -76,7 +93,8 @@ async function runStep(goal) {
       url: dom.url,
       visible_text: dom.visible_text,
       elements: dom.elements,
-      screenshot_data_url: screenshotDataUrl,
+      screenshot_data_url: finalScreenshot,
+      face_regions: faceRegions,
       approved_by_user: false
     })
   });

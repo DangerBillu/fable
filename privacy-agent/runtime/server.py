@@ -20,9 +20,24 @@ from agent.planner import Planner
 from mcp.gateway import McpGateway
 from runtime.audit import AuditLogger
 from runtime.policy import PolicyEngine
-from runtime.privacy import ImageRedactor, PrivacyDetector, PrivacyFirewall
-from runtime.state import DomElement, RawDom, RawObservation, RawScreenshot
+from runtime.privacy import FaceDetector, ImageRedactor, PrivacyDetector, PrivacyFirewall, VisualClassifier
+from runtime.state import DomElement, FaceRegion, RawDom, RawObservation, RawScreenshot
 from runtime.tokenization import TokenVault
+
+# Optional: import HuggingFace client
+try:
+    from agent.hf import HuggingFaceClient
+except ImportError:
+    HuggingFaceClient = None
+
+
+class FaceRegionPayload(BaseModel):
+    x: int
+    y: int
+    width: int
+    height: int
+    confidence: float = 0.75
+    source: str = "browser"
 
 
 class ElementPayload(BaseModel):
@@ -50,10 +65,11 @@ class ObservationPayload(BaseModel):
     elements: list[ElementPayload]
     screenshot_data_url: str | None = None
     approved_by_user: bool = False
+    face_regions: list[FaceRegionPayload] = Field(default_factory=list)
 
 
 vault = TokenVault()
-app = FastAPI(title="Privacy Agent Runtime", version="0.1.0")
+app = FastAPI(title="Privacy Agent Runtime", version="0.2.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://127.0.0.1", "http://localhost", "chrome-extension://*"],
@@ -61,9 +77,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Build HuggingFace client if token is available
+hf_client = None
+hf_token = os.getenv("HF_API_TOKEN", "")
+if hf_token and HuggingFaceClient:
+    hf_client = HuggingFaceClient(
+        api_token=hf_token,
+        vision_model=os.getenv("HF_VISION_MODEL", "Salesforce/blip2-opt-2.7b"),
+        text_model=os.getenv("HF_TEXT_MODEL", "mistralai/Mistral-7B-Instruct-v0.3"),
+    )
+
+# Build agent loop with all components
+face_detector = FaceDetector() if os.getenv("FACE_DETECTION", "1") == "1" else None
+visual_classifier = VisualClassifier()
+ollama_client = OllamaClient() if os.getenv("USE_OLLAMA", "0") == "1" else None
+
 loop = AgentLoop(
-    firewall=PrivacyFirewall(PrivacyDetector(vault), ImageRedactor(), mode=os.getenv("PRIVACY_MODE", "STRICT")),
-    planner=Planner(OllamaClient() if os.getenv("USE_OLLAMA", "0") == "1" else None),
+    firewall=PrivacyFirewall(
+        detector=PrivacyDetector(vault),
+        redactor=ImageRedactor(),
+        face_detector=face_detector,
+        visual_classifier=visual_classifier,
+        mode=os.getenv("PRIVACY_MODE", "STRICT"),
+    ),
+    planner=Planner(ollama=ollama_client, hf_client=hf_client),
     policy=PolicyEngine(mode=os.getenv("PRIVACY_MODE", "STRICT")),
     gateway=McpGateway(vault),
     audit=AuditLogger(ROOT / "audit.log"),
@@ -72,12 +109,48 @@ loop = AgentLoop(
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "privacy": "local-only"}
+    return {"status": "ok", "privacy": "local-only", "version": "0.2.0"}
+
+
+@app.get("/health/vision")
+def health_vision() -> dict[str, Any]:
+    """Check if Ollama VLM is available."""
+    vlm_available = False
+    if ollama_client:
+        vlm_available = ollama_client.check_vision_available()
+    return {
+        "vlm_available": vlm_available,
+        "vision_model": os.getenv("VISION_MODEL", "llava"),
+        "ollama_enabled": ollama_client is not None,
+    }
+
+
+@app.get("/health/hf")
+def health_hf() -> dict[str, Any]:
+    """Check if HuggingFace API is reachable."""
+    hf_available = False
+    if hf_client:
+        hf_available = hf_client.is_available()
+    return {
+        "hf_available": hf_available,
+        "hf_token_set": bool(hf_token),
+    }
 
 
 @app.post("/agent/step")
 def agent_step(payload: ObservationPayload) -> dict:
     try:
+        face_regions = tuple(
+            FaceRegion(
+                x=fr.x,
+                y=fr.y,
+                width=fr.width,
+                height=fr.height,
+                confidence=fr.confidence,
+                source=fr.source,
+            )
+            for fr in payload.face_regions
+        )
         observation = RawObservation(
             session_id=payload.session_id,
             raw_dom=RawDom(
@@ -87,6 +160,7 @@ def agent_step(payload: ObservationPayload) -> dict:
                 elements=tuple(DomElement(**element.model_dump()) for element in payload.elements),
             ),
             raw_screenshot=RawScreenshot(payload.screenshot_data_url) if payload.screenshot_data_url else None,
+            face_regions=face_regions,
         )
         return loop.step(observation, payload.user_instruction, approved_by_user=payload.approved_by_user)
     except Exception as exc:
@@ -96,4 +170,7 @@ def agent_step(payload: ObservationPayload) -> dict:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("runtime.server:app", host="127.0.0.1", port=8000)
+    port = int(os.getenv("PORT", os.getenv("RUNTIME_PORT", "8000")))
+    uvicorn.run(app, host="127.0.0.1", port=port)
+
+

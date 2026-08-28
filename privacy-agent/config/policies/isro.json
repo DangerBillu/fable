@@ -1,0 +1,78 @@
+{
+  "name": "ISRO Privacy Policy",
+  "mode": "STRICT",
+  "description": "Enhanced privacy policy for ISRO browser agent with defense-grade protections.",
+  "sensitive_categories": {
+    "FACE": {
+      "classification": "RESTRICTED",
+      "action": "blur",
+      "description": "All detected human faces are automatically blurred before any processing."
+    },
+    "MISSION_DATA": {
+      "classification": "SECRET",
+      "action": "redact",
+      "description": "ISRO mission identifiers, satellite designations, and launch data."
+    },
+    "FACILITY_LOCATION": {
+      "classification": "SECRET",
+      "action": "redact",
+      "description": "Coordinates and location data for ISRO facilities and ground stations."
+    },
+    "SATELLITE_DESIGNATION": {
+      "classification": "RESTRICTED",
+      "action": "redact",
+      "description": "Satellite names, orbits, transponder configurations."
+    },
+    "PERSONNEL_PHOTO": {
+      "classification": "RESTRICTED",
+      "action": "blur",
+      "description": "Photographs of ISRO personnel and visitors."
+    },
+    "CLASSIFICATION_MARKER": {
+      "classification": "SECRET",
+      "action": "redact",
+      "description": "Document classification headers: TOP SECRET, SECRET, CONFIDENTIAL, RESTRICTED."
+    },
+    "AADHAAR": {
+      "classification": "RESTRICTED",
+      "action": "tokenize",
+      "description": "12-digit Aadhaar identification numbers."
+    },
+    "PAN": {
+      "classification": "RESTRICTED",
+      "action": "tokenize",
+      "description": "PAN card numbers (XXXXX0000X format)."
+    }
+  },
+  "action_permissions": {
+    "click": "ALLOW",
+    "scroll": "ALLOW",
+    "go_back": "ALLOW",
+    "wait": "ALLOW",
+    "done": "ALLOW",
+    "type": "REQUIRE_APPROVAL",
+    "navigate": "DENY",
+    "select": "REQUIRE_APPROVAL",
+    "press_key": "ALLOW",
+    "get_screenshot": "ALLOW_SANITIZED_ONLY"
+  },
+  "domain_restrictions": {
+    "allow_list": [],
+    "block_list": [],
+    "block_external_navigation": true,
+    "block_file_upload": true,
+    "block_file_download": true,
+    "block_clipboard_access": true
+  },
+  "face_detection": {
+    "enabled": true,
+    "auto_classify_as": "RESTRICTED",
+    "blur_radius": 20,
+    "confidence_threshold": 0.7
+  },
+  "emergency_switches": {
+    "kill_agent": true,
+    "require_approval_for_all": false,
+    "deny_all_actions": false
+  }
+}

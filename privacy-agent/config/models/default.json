@@ -12,11 +12,21 @@
     "enabled": true
   },
   "vision": {
-    "enabled": false,
-    "model": null,
+    "enabled": true,
+    "model": "llava",
     "version": null,
     "sha256": null,
-    "invoke_only_when_ambiguous": true
+    "invoke_only_when_ambiguous": false
+  },
+  "huggingface": {
+    "enabled": true,
+    "vision_model": "Salesforce/blip2-opt-2.7b",
+    "text_model": "mistralai/Mistral-7B-Instruct-v0.3",
+    "classification_model": "facebook/bart-large-mnli"
+  },
+  "face_detection": {
+    "browser_side": true,
+    "server_side_fallback": true,
+    "confidence_threshold": 0.75
   }
 }
-

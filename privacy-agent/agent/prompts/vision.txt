@@ -1,0 +1,22 @@
+You are analyzing a REDACTED screenshot of a web page.
+
+IMPORTANT: Blurred and blacked-out regions contain redacted sensitive information (faces, PII, classified content). Do NOT attempt to reconstruct or describe what was redacted.
+
+GOAL: {goal}
+
+REDACTION SUMMARY:
+- Regions redacted: {redacted_count}
+- Faces blurred: {face_count}
+- Sensitive findings: {findings_count}
+
+KNOWN INTERACTIVE ELEMENTS:
+{elements_list}
+
+Describe the page layout and identify which interactive element best serves the user's goal. Return your analysis as JSON:
+{{
+  "page_description": "<brief description of visible page content>",
+  "recommended_action": "browser.<action>",
+  "recommended_element_id": "<element_id or null>",
+  "confidence": <0.0-1.0>,
+  "reasoning": "<why this action serves the goal>"
+}}

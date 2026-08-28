@@ -1,0 +1,22 @@
+GOAL: {goal}
+
+CURRENT PAGE:
+Title: {title}
+Domain: {domain}
+
+PRIVACY STATUS:
+- Mode: {privacy_mode}
+- Sensitive findings: {findings_count}
+- Regions redacted: {redacted_count}
+- Faces blurred: {face_count}
+
+INTERACTIVE ELEMENTS:
+{elements_list}
+
+VISIBLE TEXT (sanitized):
+{visible_text}
+
+STEP: {step_number}
+PREVIOUS ACTIONS: {previous_actions}
+
+Select exactly ONE action. Prefer element_id over coordinates. Return valid JSON only.

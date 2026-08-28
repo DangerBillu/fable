@@ -17,16 +17,35 @@ Local, privacy-first browser agent MVP. The product principle is a privacy firew
 
 ## Run
 
+Create the venv once:
+
 ```powershell
-cd privacy-agent
+cd C:\Users\yousi\OneDrive\Documents\fable\privacy-agent
+C:\Users\yousi\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe -m venv .venv
+```
+
+Start it and install dependencies:
+
+```powershell
+cd C:\Users\yousi\OneDrive\Documents\fable\privacy-agent
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
+```
+
+Start the app:
+
+```powershell
+cd C:\Users\yousi\OneDrive\Documents\fable\privacy-agent
+.\.venv\Scripts\Activate.ps1
 python -m uvicorn runtime.server:app --host 127.0.0.1 --port 8000
 ```
 
 If you have not installed the FastAPI dependencies yet, run the dependency-free local server:
 
 ```powershell
-cd privacy-agent
+cd C:\Users\yousi\OneDrive\Documents\fable\privacy-agent
+.\.venv\Scripts\Activate.ps1
 python -m runtime.stdlib_server
 ```
 
@@ -46,7 +65,8 @@ No cloud model, telemetry, or remote screenshot processing is used.
 ## Test
 
 ```powershell
-cd privacy-agent
+cd C:\Users\yousi\OneDrive\Documents\fable\privacy-agent
+.\.venv\Scripts\Activate.ps1
 python -m unittest discover -s tests
 ```
 

@@ -86,11 +86,35 @@ class RawDom:
 
 
 @dataclass(frozen=True)
+class FaceRegion:
+    """A detected face bounding box, from browser-side or server-side detection."""
+    x: int
+    y: int
+    width: int
+    height: int
+    confidence: float
+    source: Literal["browser", "server"] = "server"
+
+
+@dataclass(frozen=True)
+class VisualFinding:
+    """A visual content classification result from image analysis."""
+    category: SensitiveCategory
+    classification: ClassificationLevel
+    description: str
+    confidence: float
+    bbox: tuple[int, int, int, int] | None = None
+    source: Literal["opencv", "heuristic", "huggingface"] = "opencv"
+
+
+@dataclass(frozen=True)
 class RawObservation:
     session_id: str
     raw_dom: RawDom
     raw_screenshot: RawScreenshot | None = None
     raw_ocr_text: str | None = None
+    face_regions: tuple[FaceRegion, ...] = ()
+
 
 
 @dataclass(frozen=True)
@@ -147,6 +171,8 @@ class SanitizedObservation:
     sensitive_regions: tuple[SensitiveRegion, ...]
     sensitive_findings: tuple[SensitiveFinding, ...]
     state: SanitizedState
+    face_count: int = 0
+    visual_findings_count: int = 0
 
 
 @dataclass(frozen=True)

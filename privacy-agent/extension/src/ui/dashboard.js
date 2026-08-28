@@ -19,7 +19,7 @@ async function refresh() {
   }
   const stats = response.stats;
   document.getElementById("status").textContent = response.running ? "Running" : stats.status;
-  for (const id of ["screenshots", "redacted", "tokenized", "blocked", "approved"]) {
+  for (const id of ["screenshots", "facesBlurred", "redacted", "tokenized", "blocked", "approved"]) {
     document.getElementById(id).textContent = String(stats[id] || 0);
   }
 }

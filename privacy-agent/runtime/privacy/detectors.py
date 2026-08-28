@@ -24,6 +24,9 @@ PATTERN_RULES = (
     PatternRule(SensitiveCategory.AUTH_HEADER, ClassificationLevel.SECRET, re.compile(r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}\b", re.I), 0.99),
     PatternRule(SensitiveCategory.PRIVATE_KEY, ClassificationLevel.SECRET, re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"), 1.0),
     PatternRule(SensitiveCategory.IDENTIFICATION_NUMBER, ClassificationLevel.RESTRICTED, re.compile(r"\b\d{3}-\d{2}-\d{4}\b"), 0.95),
+    PatternRule(SensitiveCategory.IDENTIFICATION_NUMBER, ClassificationLevel.RESTRICTED, re.compile(r"\b\d{4}\s?\d{4}\s?\d{4}\b"), 0.85),  # Aadhaar
+    PatternRule(SensitiveCategory.IDENTIFICATION_NUMBER, ClassificationLevel.RESTRICTED, re.compile(r"\b[A-Z]{5}\d{4}[A-Z]\b"), 0.95),  # PAN
+    PatternRule(SensitiveCategory.IDENTIFICATION_NUMBER, ClassificationLevel.RESTRICTED, re.compile(r"\b[A-Z]\d{7}\b"), 0.80),  # Indian passport
 )
 
 SENSITIVE_FIELD_RE = re.compile(
@@ -39,6 +42,11 @@ HIGH_RISK_AUTOCOMPLETE = {
     "cc-csc",
     "one-time-code",
 }
+
+CLASSIFICATION_MARKERS = re.compile(
+    r"\b(?:TOP\s+SECRET|SECRET|CONFIDENTIAL|RESTRICTED|FOR\s+OFFICIAL\s+USE\s+ONLY|CONTROLLED\s+UNCLASSIFIED)\b",
+    re.I,
+)
 
 
 class PrivacyDetector:
@@ -191,5 +199,7 @@ class PrivacyDetector:
     def _looks_like_private_document(self, text: str) -> bool:
         lowered = text.lower()
         signals = ("confidential", "restricted", "internal memo", "nda", "privileged", "medical record", "bank statement")
-        return sum(1 for signal in signals if signal in lowered) >= 2
+        has_signal = sum(1 for signal in signals if signal in lowered) >= 2
+        has_marker = bool(CLASSIFICATION_MARKERS.search(text))
+        return has_signal or has_marker
 

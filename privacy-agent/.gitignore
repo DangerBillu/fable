@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+audit.log
+last_sanitized_state.json
+tmp-test-audit.log
+.pytest_cache/
+.DS_Store

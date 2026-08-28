@@ -3,7 +3,7 @@
   "name": "Privacy Agent",
   "description": "Local privacy firewall around a browser-use agent.",
   "version": "0.1.0",
-  "permissions": ["activeTab", "scripting", "tabs", "storage"],
+  "permissions": ["activeTab", "scripting", "tabs", "storage", "offscreen"],
   "host_permissions": ["<all_urls>", "http://127.0.0.1:8000/*", "http://localhost:8000/*"],
   "background": {
     "service_worker": "src/browser/background.js",

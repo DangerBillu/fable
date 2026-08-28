@@ -1,0 +1,56 @@
+{
+  "page": {
+    "title": "ISRO SATELLITE CENTRE \u2014 PERSONNEL PORTAL",
+    "domain": "isro.gov.in"
+  },
+  "elements": [
+    {
+      "id": "email-to",
+      "type": "input",
+      "label": "Recipient Email",
+      "bbox": null,
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "email-subject",
+      "type": "input",
+      "label": "Subject",
+      "bbox": null,
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "email-body",
+      "type": "textarea",
+      "label": "Message Body",
+      "bbox": null,
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "btn-send-email",
+      "type": "button",
+      "label": "EMAIL_FIELD",
+      "bbox": null,
+      "enabled": true,
+      "href": null
+    }
+  ],
+  "visible_text": "[PRIVATE_DOCUMENT_REDACTED]",
+  "privacy": {
+    "mode": "STRICT",
+    "findings": 7,
+    "sensitive_regions": 0,
+    "redacted": 0,
+    "categories": [
+      "EMAIL",
+      "IDENTIFICATION_NUMBER",
+      "PHONE",
+      "PRIVATE_DOCUMENT"
+    ],
+    "raw_data_local_only": true,
+    "face_count": 0,
+    "visual_findings": 0
+  }
+}

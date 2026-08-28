@@ -4,6 +4,7 @@ from .types import (
     BrowserAction,
     ClassificationLevel,
     DomElement,
+    FaceRegion,
     PolicyDecision,
     RawDom,
     RawObservation,
@@ -15,6 +16,7 @@ from .types import (
     SensitiveCategory,
     SensitiveFinding,
     SensitiveRegion,
+    VisualFinding,
 )
 
 __all__ = [
@@ -23,6 +25,7 @@ __all__ = [
     "BrowserAction",
     "ClassificationLevel",
     "DomElement",
+    "FaceRegion",
     "PolicyDecision",
     "RawDom",
     "RawObservation",
@@ -34,5 +37,7 @@ __all__ = [
     "SensitiveCategory",
     "SensitiveFinding",
     "SensitiveRegion",
+    "VisualFinding",
 ]
+
 
