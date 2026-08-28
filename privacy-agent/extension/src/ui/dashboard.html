@@ -1,63 +1,87 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Fable</title>
+    <title>FABLE Copilot</title>
     <link rel="stylesheet" href="dashboard.css" />
   </head>
   <body>
-    <main>
-      <header>
-        <div class="header-title">
-          <span class="brand-tag">Fable</span>
-          <h1>Private Page Assistant</h1>
+    <div class="fable-chat-app">
+      <!-- Chatbot Header -->
+      <header class="chat-header">
+        <div class="header-left">
+          <div class="bot-avatar">F</div>
+          <div class="header-info">
+            <h2>FABLE <span class="badge-copilot">COPILOT</span></h2>
+            <div class="status-indicator">
+              <span class="status-dot"></span>
+              <span id="agent-status-text">Shield Active & Ready</span>
+            </div>
+          </div>
         </div>
-        <span id="status">Shield Active</span>
+        <div class="header-actions">
+          <button id="btn-clear-chat" title="Clear conversation" class="icon-btn">🗑️</button>
+        </div>
       </header>
-      
-      <label>
-        Task
-        <textarea id="goal" rows="4">Summarize this article and email it to me</textarea>
-      </label>
 
-      <div class="presets">
-        <button type="button" class="btn-preset" onclick="setGoal('Summarize this article and email it to me')">Email summary</button>
-        <button type="button" class="btn-preset" onclick="setGoal('Open the settings page')">Open settings</button>
-        <button type="button" class="btn-preset" onclick="setGoal('Search this page for the most important facts')">Find facts</button>
+      <!-- Privacy Shield Bar -->
+      <div class="shield-status-bar">
+        <div class="shield-chip">
+          <span class="shield-icon">🛡️</span>
+          <span>Redaction Shield: <strong id="stat-redacted">0</strong> redacted</span>
+        </div>
+        <div class="shield-chip">
+          <span>Blurred: <strong id="stat-faces">0</strong></span>
+        </div>
+        <div class="shield-chip">
+          <span>Approved: <strong id="stat-approved">0</strong></span>
+        </div>
       </div>
 
-      <div class="mode">
-        <span>Mode</span>
-        <strong>Local privacy shield</strong>
+      <!-- Chat Messages Container -->
+      <div id="chat-messages" class="chat-messages">
+        <!-- Initial Welcome Message from Fable -->
+        <div class="msg-row bot-row">
+          <div class="msg-avatar">F</div>
+          <div class="msg-bubble bot-bubble">
+            <p><strong>Hello! I am FABLE</strong>, your privacy-first browser copilot & autonomous MCP agent.</p>
+            <p>I can analyze page telemetry, click buttons, fill forms, or dispatch mission reports—all while keeping confidential CAD blueprints and crypto keys completely redacted.</p>
+            <div class="quick-chips">
+              <button class="chip" data-prompt="Trigger stage separation on launch console">🚀 Stage Separation</button>
+              <button class="chip" data-prompt="Email flight test results to arnav.goyal0713@gmail.com">📧 Email Flight Report</button>
+              <button class="chip" data-prompt="Recalibrate engine gimbal on launch console">📐 Recalibrate Gimbal</button>
+              <button class="chip" data-prompt="Emergency telemetry hold">⚠️ Emergency Hold</button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <section class="checks">
-        <div>Page capture</div><div>Ready</div>
-        <div>Text redaction</div><div>Active</div>
-        <div>Browser actions</div><div>Policy checked</div>
-        <div>Email summaries</div><div>SMTP/Outbox</div>
-        <div>Audit trail</div><div>Local</div>
-      </section>
+      <!-- Live Action Banner (when bot is clicking/acting) -->
+      <div id="live-action-banner" class="live-action-banner" style="display: none;">
+        <span class="spinner"></span>
+        <span id="action-banner-text">Executing action on webpage...</span>
+      </div>
 
-      <section class="stats">
-        <div><span>Screenshots</span><strong id="screenshots">0</strong></div>
-        <div><span>Faces Blurred</span><strong id="facesBlurred">0</strong></div>
-        <div><span>Tokens Redacted</span><strong id="tokenized">0</strong></div>
-        <div><span>Regions Redacted</span><strong id="redacted">0</strong></div>
-        <div><span>Blocked</span><strong id="blocked">0</strong></div>
-        <div><span>Approved</span><strong id="approved">0</strong></div>
-      </section>
-
-      <section class="boundary">
-        <div><strong>Raw page data</strong><span>Local only</span></div>
-        <div><strong>Sanitized context</strong><span>Used for actions</span></div>
-      </section>
-
-      <footer>
-        <button id="start">Run Fable</button>
-        <button id="stop">Stop</button>
+      <!-- Chat Input Area -->
+      <footer class="chat-footer">
+        <form id="chat-form" class="chat-input-form" onsubmit="handleChatSubmit(event)">
+          <textarea
+            id="chat-input"
+            rows="1"
+            placeholder="Ask FABLE to click, type, analyze, or email..."
+            autocomplete="off"
+          ></textarea>
+          <button type="submit" id="btn-send" class="btn-send" title="Send Directive">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+          </button>
+          <button type="button" id="btn-stop" class="btn-stop" title="Stop Agent" style="display: none;">
+            ⏹
+          </button>
+        </form>
       </footer>
-    </main>
+    </div>
     <script src="dashboard.js"></script>
   </body>
 </html>

@@ -15,6 +15,21 @@
     "[tabindex]"
   ].join(",");
 
+  // Inject visual click pulse style
+  const styleEl = document.createElement("style");
+  styleEl.textContent = `
+    @keyframes fablePulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.8), 0 0 10px rgba(0, 255, 136, 0.6); outline: 3px solid #00ff88; }
+      50% { box-shadow: 0 0 0 12px rgba(0, 255, 136, 0.3), 0 0 20px rgba(0, 255, 136, 0.8); outline: 3px solid #00ff88; }
+      100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0), 0 0 0 rgba(0, 255, 136, 0); outline: none; }
+    }
+    .fable-agent-active-target {
+      animation: fablePulse 1.2s ease-out !important;
+      transition: outline 0.2s ease !important;
+    }
+  `;
+  document.head.appendChild(styleEl);
+
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message?.type === "PING_PRIVACY_AGENT") {
       sendResponse({ ok: true });
@@ -109,22 +124,45 @@
   }
 
   function click(elementId) {
-    const target = findByStableId(elementId);
+    const target = findElement(elementId);
     if (!target) {
       throw new Error(`Element not found: ${elementId}`);
     }
-    target.scrollIntoView({ block: "nearest", inline: "nearest" });
-    target.focus?.({ preventScroll: true });
-    target.click();
-    return { action: "click", element_id: elementId };
+    
+    // Smooth scroll into view
+    target.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+
+    // Visual pulse effect
+    target.classList.remove("fable-agent-active-target");
+    void target.offsetWidth; // trigger reflow
+    target.classList.add("fable-agent-active-target");
+
+    setTimeout(() => {
+      target.focus?.({ preventScroll: true });
+      
+      // Dispatch full mouse click event sequence
+      target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
+      target.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
+      target.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+      
+      // Call native click() if button/link/input
+      if (typeof target.click === "function") {
+        target.click();
+      }
+    }, 200);
+
+    return { action: "click", element_id: elementId, tag: target.tagName.toLowerCase() };
   }
 
   function typeInto(elementId, text) {
-    const target = findByStableId(elementId);
+    const target = findElement(elementId);
     if (!target) {
       throw new Error(`Element not found: ${elementId}`);
     }
+    target.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+    target.classList.add("fable-agent-active-target");
     target.focus();
+
     if (target.isContentEditable) {
       document.execCommand("insertText", false, text);
     } else {
@@ -135,11 +173,44 @@
     return { action: "type", element_id: elementId, characters: text.length };
   }
 
-  function findByStableId(elementId) {
-    return document.querySelector(`[data-privacy-agent-id="${CSS.escape(elementId)}"]`);
+  function findElement(elementId) {
+    if (!elementId) return null;
+
+    // 1. By exact data-privacy-agent-id
+    let el = document.querySelector(`[data-privacy-agent-id="${CSS.escape(elementId)}"]`);
+    if (el) return el;
+
+    // 2. By standard DOM ID attribute
+    el = document.getElementById(elementId);
+    if (el) return el;
+
+    // 3. By selector
+    try {
+      el = document.querySelector(`#${CSS.escape(elementId)}`);
+      if (el) return el;
+    } catch (_) {}
+
+    // 4. By name attribute
+    el = document.querySelector(`[name="${CSS.escape(elementId)}"]`);
+    if (el) return el;
+
+    // 5. Fuzzy match on text / aria-label for buttons
+    const buttons = Array.from(document.querySelectorAll("button, [role='button'], a, input[type='button'], input[type='submit']"));
+    const wanted = elementId.toLowerCase().replace(/[^a-z0-9]/g, "");
+    for (const btn of buttons) {
+      const text = (btn.textContent || btn.value || btn.getAttribute("aria-label") || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      if (text && (text.includes(wanted) || wanted.includes(text))) {
+        return btn;
+      }
+    }
+
+    return null;
   }
 
   function stableId(element, index) {
+    if (element.id) {
+      return element.id;
+    }
     if (element.dataset.privacyAgentId) {
       return element.dataset.privacyAgentId;
     }
@@ -178,4 +249,3 @@
     return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
   }
 })();
-
