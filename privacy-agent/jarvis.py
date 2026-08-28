@@ -131,7 +131,28 @@ def process_jarvis_command(agent: AgentLoop, gateway: McpGateway, command: str) 
         "mcp_action": result.get("command") or result.get("action"),
         "jarvis_reasoning": result.get("reasoning")
     }
-    telemetry_file.write_text(json.dumps(telemetry_summary, indent=2), encoding="utf-8")
+    # If email directive was given, execute comms MCP tool
+    import re
+    email_match = re.search(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", command)
+    if "email" in command.lower() or "mail" in command.lower() or email_match:
+        recipient = email_match.group(0) if email_match else "mission-control@isro.gov.in"
+        comms_result = gateway.execute_tool(
+            "comms.transmit_telemetry_email",
+            recipient=recipient,
+            subject="ISRO LVM3-M4 Flight Telemetry & Stage Test Report",
+            telemetry=telemetry_summary["sanitized_telemetry"],
+        )
+        dispatch_info = comms_result.get("dispatch", {})
+        print("\n[MCP: COMMS DISPATCH STATUS]")
+        print(f"   * Recipient         : {recipient}")
+        if dispatch_info.get("smtp_sent"):
+            print(f"   * SMTP Live Delivery: [DELIVERED via {os.getenv('SMTP_HOST')}]")
+        else:
+            print(f"   * Live SMTP Delivery: [NOT CONFIGURED - Saved to Local Outbox]")
+            if dispatch_info.get("smtp_error"):
+                print(f"   * SMTP Note         : {dispatch_info['smtp_error']}")
+        print(f"   * View HTML Report  : outbox/latest_flight_report.html")
+        print(f"   * View Raw EML File : outbox/latest_flight_report.eml")
 
     print("\n[JARVIS RESPONSE]")
     print(f"   * Policy Decision   : {result['status']}")

@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f5; color: #1a2621; margin: 0; padding: 20px; }
+    .container { max-width: 650px; margin: 0 auto; background: #ffffff; border: 1px solid #d4dfd8; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .header { background: #0b2318; color: #ffffff; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .badge { background: #d9381e; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 1px; }
+    .content { padding: 24px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+    .stat-card { background: #f0f6f2; border: 1px solid #d0e2d6; border-radius: 6px; padding: 12px; }
+    .stat-label { font-size: 11px; color: #5a7566; text-transform: uppercase; font-weight: 600; }
+    .stat-value { font-size: 20px; color: #0f5132; font-weight: bold; margin-top: 4px; font-family: Consolas, monospace; }
+    .privacy-notice { background: #e8f4ec; border-left: 4px solid #198754; padding: 12px 16px; margin: 20px 0; border-radius: 0 6px 6px 0; font-size: 13px; color: #145a32; }
+    .footer { background: #f8faf9; border-top: 1px solid #e1ebe5; padding: 14px 24px; font-size: 12px; color: #738a7e; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h2 style="margin: 0; font-size: 18px; letter-spacing: 0.5px;">ISRO TELEMETRY & FLIGHT OPERATIONS</h2>
+        <div style="font-size: 12px; color: #8fd4af; margin-top: 4px;">Mission: LVM3-M4 / Chandrayaan Flight Tracking</div>
+      </div>
+      <span class="badge">OFFICIAL DISPATCH</span>
+    </div>
+    <div class="content">
+      <p>Dear <strong>flight.director@isro.gov.in</strong>,</p>
+      <p>This is an automated encrypted dispatch containing sanitized live telemetry from the <strong>LVM3-M4 Launch Simulation</strong>.</p>
+
+      <div class="grid">
+        <div class="stat-card">
+          <div class="stat-label">Altitude / Elevation</div>
+          <div class="stat-value">54.2 km</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Velocity / Speed</div>
+          <div class="stat-value">1824.5 m/s</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Mach Regime</div>
+          <div class="stat-value">Mach 5.42</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Dynamic Pressure (Max-Q)</div>
+          <div class="stat-value">34.8 kPa</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Chamber Pressure</div>
+          <div class="stat-value">58.4 bar</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Core Propellant Remaining</div>
+          <div class="stat-value">71.8 %</div>
+        </div>
+      </div>
+
+      <div class="privacy-notice">
+        <strong>🛡️ J.A.R.V.I.S. Privacy Shield Verification:</strong><br/>
+        All confidential Cryogenic Engine (CE-20) blueprints, nozzle CAD specifications, and cryptographic transponder keys were redacted prior to external transmission.
+      </div>
+    </div>
+    <div class="footer">
+      Indian Space Research Organisation (ISRO) • Autonomous Mission Control Agent
+    </div>
+  </div>
+</body>
+</html>

@@ -110,15 +110,33 @@ class McpRegistry:
             )
         )
 
-    def _handle_comms_email(self, recipient: str = "mission-control@isro.gov.in", subject: str = "", sanitized_body: str = "", **kw) -> dict:
+    def _handle_comms_email(self, recipient: str = "mission-control@isro.gov.in", subject: str = "", sanitized_body: str = "", telemetry: dict[str, Any] | None = None, **kw) -> dict:
+        from runtime.comms.email_sender import EmailSender
         resolved_recipient = self.vault.resolve(recipient) if self.vault.has(recipient) else recipient
+        telemetry_payload = telemetry or {
+            "altitude_km": 54.20,
+            "velocity_ms": 1824.5,
+            "mach": 5.42,
+            "dynamic_pressure_kpa": 34.80,
+            "chamber_pressure_bar": 58.4,
+            "propellant_remaining_pct": 71.8,
+        }
+        sender = EmailSender()
+        dispatch_result = sender.send_telemetry_email(
+            recipient=resolved_recipient,
+            subject=subject or "LVM3-M4 Launch Telemetry & Max-Q Stage Report",
+            telemetry_data=telemetry_payload,
+            raw_text=sanitized_body,
+        )
         return {
             "action": "click",
             "element_id": "btn-send-telemetry-report",
             "recipient": resolved_recipient,
             "subject": subject or "LVM3-M4 Launch Telemetry & Max-Q Stage Report",
-            "status": "queued_for_transmission",
+            "dispatch": dispatch_result,
+            "status": "sent" if dispatch_result.get("smtp_sent") else "saved_to_outbox",
         }
+
 
     def _handle_telemetry_analysis(self, altitude_km: float = 54.2, velocity_ms: float = 1824.5, dynamic_pressure_kpa: float = 34.8, **kw) -> dict:
         is_max_q_cleared = dynamic_pressure_kpa < 40.0

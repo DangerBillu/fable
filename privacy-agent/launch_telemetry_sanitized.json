@@ -1,6 +1,6 @@
 {
   "mission": "LVM3-M4 / ISRO ROCKET LAUNCH SIMULATION",
-  "jarvis_directive": "JARVIS, trigger stage separation and email the flight test results to director@isro.gov.in",
+  "jarvis_directive": "python jarvis.py \"JARVIS, email the flight test results to arnav.goyal0713@gmail.com\"",
   "flight_phase": "STAGE-1 BOOSTER FLIGHT",
   "sanitized_telemetry": {
     "altitude_km": 54.2,
@@ -21,7 +21,7 @@
   },
   "mcp_action": {
     "action": "click",
-    "element_id": "btn-stage-sep"
+    "element_id": "btn-send-telemetry-report"
   },
-  "jarvis_reasoning": "Triggered Stage Separation on rocket launch console."
+  "jarvis_reasoning": "Dispatched sanitized flight test telemetry report to arnav.goyal0713@gmail.com."
 }
