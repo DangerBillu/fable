@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "FABLE — Privacy Agent",
-  "description": "FABLE: Privacy-First Autonomous Multi-Agent & MCP Army for Defense & Aerospace.",
+  "name": "Fable",
+  "description": "Fable summarizes pages, performs browser tasks, and protects private data locally.",
   "version": "1.0.0",
   "permissions": ["activeTab", "scripting", "tabs", "storage", "offscreen"],
   "host_permissions": ["<all_urls>", "http://127.0.0.1:8000/*", "http://localhost:8000/*"],
@@ -10,7 +10,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "FABLE Mission Control",
+    "default_title": "Fable",
     "default_popup": "src/ui/dashboard.html"
   },
   "content_scripts": [

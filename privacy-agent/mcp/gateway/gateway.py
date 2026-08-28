@@ -40,7 +40,7 @@ class McpGateway:
         return command
 
     def execute_tool(self, tool_name: str, **kwargs) -> dict[str, Any]:
-        """Execute a registered J.A.R.V.I.S. MCP tool."""
+        """Execute a registered Fable MCP tool."""
         tool = self.registry.get_tool(tool_name)
         if not tool:
             raise KeyError(f"MCP Tool not found: {tool_name}")

@@ -107,6 +107,7 @@ class PrivacyFirewall:
             domain=domain,
             elements=tuple(sanitized_elements),
             visible_text=visible_text,
+            url=observation.raw_dom.url,
         )
         state = self._state_from_dom(sanitized_dom, findings, regions, screenshot, len(merged_face_regions), len(visual_findings_list))
         assert state._sanitized_marker == "SANITIZED_STATE"
@@ -133,7 +134,7 @@ class PrivacyFirewall:
         extractor = self.telemetry_extractor or TelemetryExtractor()
         telemetry, ui_state = extractor.extract(dom.visible_text, dom.elements)
         return SanitizedState(
-            page={"title": dom.title, "domain": dom.domain},
+            page={"title": dom.title, "domain": dom.domain, "url": dom.url},
             elements=tuple(
                 {
                     "id": element.id,

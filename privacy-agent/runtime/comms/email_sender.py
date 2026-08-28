@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import os
+import re
+import socket
 import smtplib
+from email.message import Message
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import parseaddr
+from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -18,7 +23,33 @@ def load_project_env() -> None:
             line = line.strip()
             if line and not line.startswith("#") and "=" in line:
                 k, v = line.split("=", 1)
-                os.environ[k.strip()] = v.strip()
+                os.environ[k.strip()] = _clean_env_value(v)
+
+
+def _clean_env_value(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    if " #" in value:
+        value = value.split(" #", 1)[0].rstrip()
+    return value
+
+
+def _normalize_secret(value: str) -> str:
+    return re.sub(r"\s+", "", value or "")
+
+
+def _smtp_error_code(exc: Exception) -> str:
+    text = str(exc).lower()
+    if isinstance(exc, smtplib.SMTPAuthenticationError) or "authentication" in text:
+        return "smtp_auth_failed"
+    if isinstance(exc, (TimeoutError, socket.timeout)):
+        return "smtp_timeout"
+    if isinstance(exc, OSError) and getattr(exc, "winerror", None) == 10013:
+        return "smtp_blocked"
+    if isinstance(exc, OSError):
+        return "smtp_network_error"
+    return "smtp_error"
 
 
 class EmailSender:
@@ -27,11 +58,12 @@ class EmailSender:
     def __init__(self) -> None:
         load_project_env()
         self.smtp_host = os.getenv("SMTP_HOST", "").strip()
-        self.smtp_port = int(os.getenv("SMTP_PORT", "587"))
+        self.smtp_port = int(os.getenv("SMTP_PORT", "587").strip() or "587")
         self.smtp_user = os.getenv("SMTP_USER", "").strip()
-        # Strip all whitespace/spaces from app passwords (e.g., 'feqb qxqz eqvf saxw' -> 'feqbqxqzeqvfsaxw')
-        self.smtp_password = os.getenv("SMTP_PASSWORD", "").replace(" ", "").strip()
+        self.smtp_password = _normalize_secret(os.getenv("SMTP_PASSWORD", ""))
         self.smtp_from = os.getenv("SMTP_FROM", f"Fable ISRO Mission Control <{self.smtp_user}>").strip()
+        if not self.smtp_user and self.smtp_from:
+            self.smtp_user = parseaddr(self.smtp_from)[1].strip()
         self.outbox_dir = ROOT / "outbox"
         self.outbox_dir.mkdir(exist_ok=True)
 
@@ -64,10 +96,45 @@ class EmailSender:
 
         eml_file.write_text(msg.as_string(), encoding="utf-8")
 
-        # 2. If SMTP credentials are provided, send over the wire
+        return self._deliver_message(msg, recipient, subject, html_file, eml_file)
+
+    def send_article_summary_email(
+        self,
+        recipient: str,
+        subject: str,
+        article_title: str,
+        article_url: str,
+        summary: str,
+        source_excerpt: str = "",
+    ) -> dict[str, Any]:
+        if not recipient:
+            recipient = self.smtp_user
+        if not subject:
+            subject = f"Fable summary: {article_title or 'Current article'}"
+
+        html_body = self._build_summary_html(article_title, article_url, summary, source_excerpt)
+        text_body = self._build_summary_text(article_title, article_url, summary, source_excerpt)
+
+        html_file = self.outbox_dir / "latest_article_summary.html"
+        eml_file = self.outbox_dir / "latest_article_summary.eml"
+        html_file.write_text(html_body, encoding="utf-8")
+
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = self.smtp_from or self.smtp_user or "fable@localhost"
+        msg["To"] = recipient
+        msg.attach(MIMEText(text_body, "plain"))
+        msg.attach(MIMEText(html_body, "html"))
+        eml_file.write_text(msg.as_string(), encoding="utf-8")
+
+        return self._deliver_message(msg, recipient, subject, html_file, eml_file)
+
+    def _deliver_message(self, msg: Message, recipient: str, subject: str, html_file: Path, eml_file: Path) -> dict[str, Any]:
         smtp_sent = False
         smtp_error = None
-        if self.smtp_host and self.smtp_user and self.smtp_password:
+        smtp_error_code = None
+        smtp_configured = bool(self.smtp_host and self.smtp_user and self.smtp_password)
+        if smtp_configured:
             try:
                 if self.smtp_port == 465:
                     with smtplib.SMTP_SSL(self.smtp_host, self.smtp_port, timeout=15) as server:
@@ -83,16 +150,68 @@ class EmailSender:
                 smtp_sent = True
             except Exception as exc:
                 smtp_error = str(exc)
+                smtp_error_code = _smtp_error_code(exc)
+        else:
+            smtp_error_code = "smtp_not_configured"
 
         return {
             "recipient": recipient,
             "subject": subject,
+            "smtp_configured": smtp_configured,
             "smtp_sent": smtp_sent,
+            "smtp_error_code": smtp_error_code,
             "smtp_error": smtp_error,
             "outbox_html": str(html_file),
             "outbox_eml": str(eml_file),
             "status": "delivered_to_smtp" if smtp_sent else "saved_to_outbox",
         }
+
+    def _build_summary_html(self, article_title: str, article_url: str, summary: str, source_excerpt: str) -> str:
+        title = escape(article_title or "Current article")
+        url = escape(article_url or "")
+        summary_html = "".join(f"<p>{escape(part.strip())}</p>" for part in summary.split("\n") if part.strip())
+        excerpt = escape(source_excerpt[:1200])
+        source_link = f'<p><a href="{url}">{url}</a></p>' if url else ""
+        excerpt_block = f"<h3>Source Excerpt</h3><p>{excerpt}</p>" if excerpt else ""
+        return f"""<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {{ font-family: Arial, sans-serif; color: #17211c; background: #f6f8f7; margin: 0; padding: 20px; }}
+    main {{ max-width: 680px; margin: 0 auto; background: #ffffff; border: 1px solid #d9e2dd; border-radius: 8px; padding: 24px; }}
+    h1 {{ font-size: 22px; margin: 0 0 8px; }}
+    h2 {{ font-size: 14px; margin-top: 24px; text-transform: uppercase; color: #315d48; }}
+    h3 {{ font-size: 13px; margin-top: 22px; color: #577064; }}
+    p {{ font-size: 15px; line-height: 1.55; }}
+    .meta {{ color: #667a70; font-size: 12px; }}
+  </style>
+</head>
+<body>
+  <main>
+    <p class="meta">Fable article summary</p>
+    <h1>{title}</h1>
+    {source_link}
+    <h2>Summary</h2>
+    {summary_html or "<p>No readable article text was found on the current page.</p>"}
+    {excerpt_block}
+  </main>
+</body>
+</html>"""
+
+    def _build_summary_text(self, article_title: str, article_url: str, summary: str, source_excerpt: str) -> str:
+        parts = [
+            "FABLE ARTICLE SUMMARY",
+            "=" * 72,
+            f"Title : {article_title or 'Current article'}",
+            f"URL   : {article_url or '(not available)'}",
+            "",
+            "SUMMARY:",
+            summary or "No readable article text was found on the current page.",
+        ]
+        if source_excerpt:
+            parts.extend(["", "SOURCE EXCERPT:", source_excerpt[:1200]])
+        return "\n".join(parts)
 
     def _build_html_report(self, recipient: str, subject: str, telemetry: dict[str, Any], raw_text: str) -> str:
         alt = telemetry.get("altitude_km", 54.20)
@@ -162,7 +281,7 @@ class EmailSender:
       </div>
 
       <div class="privacy-notice">
-        <strong>🛡️ J.A.R.V.I.S. Privacy Shield Verification:</strong><br/>
+        <strong>Fable Privacy Shield Verification:</strong><br/>
         All confidential Cryogenic Engine (CE-20) blueprints, nozzle CAD specifications, and cryptographic transponder keys were redacted prior to external transmission.
       </div>
     </div>

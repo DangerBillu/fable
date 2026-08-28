@@ -152,6 +152,7 @@ class SanitizedDom:
     domain: str
     elements: tuple[DomElement, ...]
     visible_text: str
+    url: str = ""
 
 
 @dataclass(frozen=True)

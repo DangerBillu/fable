@@ -2,61 +2,60 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>FABLE — Privacy Agent & MCP Army</title>
+    <title>Fable</title>
     <link rel="stylesheet" href="dashboard.css" />
   </head>
   <body>
     <main>
       <header>
         <div class="header-title">
-          <span class="isro-tag">FABLE</span>
-          <h1>AGENT ARMY & MCP MATRIX</h1>
+          <span class="brand-tag">Fable</span>
+          <h1>Private Page Assistant</h1>
         </div>
         <span id="status">Shield Active</span>
       </header>
       
       <label>
-        Commander Directive
-        <input id="goal" value="Monitor telemetry, trigger stage separation, and email test results to arnav.goyal0713@gmail.com" />
+        Task
+        <textarea id="goal" rows="4">Summarize this article and email it to me</textarea>
       </label>
 
-      <!-- Quick Preset Buttons -->
       <div class="presets">
-        <button type="button" class="btn-preset" onclick="setGoal('Trigger stage separation on launch console')">🚀 Stage Sep</button>
-        <button type="button" class="btn-preset" onclick="setGoal('Recalibrate engine gimbal on launch console')">📐 Gimbal</button>
-        <button type="button" class="btn-preset" onclick="setGoal('Email flight test results to arnav.goyal0713@gmail.com')">📧 Email Report</button>
+        <button type="button" class="btn-preset" onclick="setGoal('Summarize this article and email it to me')">Email summary</button>
+        <button type="button" class="btn-preset" onclick="setGoal('Open the settings page')">Open settings</button>
+        <button type="button" class="btn-preset" onclick="setGoal('Search this page for the most important facts')">Find facts</button>
       </div>
 
       <div class="mode">
-        <span>Active Legion</span>
-        <strong>FABLE 5-AGENT MULTI-MCP ARMY</strong>
+        <span>Mode</span>
+        <strong>Local privacy shield</strong>
       </div>
 
       <section class="checks">
-        <div>1. SHIELD-1 (Privacy Officer)</div><div>Redaction Active</div>
-        <div>2. ANALYST-2 (Flight Dynamics)</div><div>20Hz Telemetry Stream</div>
-        <div>3. PILOT-3 (Flight Actuator)</div><div>MCP Pilot Ready</div>
-        <div>4. COMMS-4 (Email Dispatch)</div><div>SMTP/Outbox Ready</div>
-        <div>5. AUDITOR-5 (Security Sentinel)</div><div>Zero-Leak Certified</div>
+        <div>Page capture</div><div>Ready</div>
+        <div>Text redaction</div><div>Active</div>
+        <div>Browser actions</div><div>Policy checked</div>
+        <div>Email summaries</div><div>SMTP/Outbox</div>
+        <div>Audit trail</div><div>Local</div>
       </section>
 
       <section class="stats">
         <div><span>Screenshots</span><strong id="screenshots">0</strong></div>
-        <div><span>Engine Blurred</span><strong id="facesBlurred">0</strong></div>
+        <div><span>Faces Blurred</span><strong id="facesBlurred">0</strong></div>
         <div><span>Tokens Redacted</span><strong id="tokenized">0</strong></div>
-        <div><span>Classified Boxes</span><strong id="redacted">0</strong></div>
+        <div><span>Regions Redacted</span><strong id="redacted">0</strong></div>
         <div><span>Blocked</span><strong id="blocked">0</strong></div>
         <div><span>Approved</span><strong id="approved">0</strong></div>
       </section>
 
       <section class="boundary">
-        <div><strong>RAW CAD / CRYPTO KEYS</strong><span>ISOLATED LOCAL VAULT</span></div>
-        <div><strong>SANITIZED TELEMETRY</strong><span>SHARED ACROSS AGENT ARMY</span></div>
+        <div><strong>Raw page data</strong><span>Local only</span></div>
+        <div><strong>Sanitized context</strong><span>Used for actions</span></div>
       </section>
 
       <footer>
-        <button id="start">Deploy FABLE Army</button>
-        <button id="stop">Emergency Abort</button>
+        <button id="start">Run Fable</button>
+        <button id="stop">Stop</button>
       </footer>
     </main>
     <script src="dashboard.js"></script>

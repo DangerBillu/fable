@@ -1,6 +1,6 @@
 {
   "mission": "FABLE / ISRO LVM3-M4 MISSION ORCHESTRATION",
-  "commander_directive": "FABLE, analyze flight telemetry, trigger stage separation, and email test results to arnav.goyal0713@gmail.com",
+  "commander_directive": "\"send telemetry report to lm10arnav@gmail.com\"",
   "army_of_agents": {
     "privacy_shield": {
       "agent": "SHIELD-1 (Privacy & Redaction Officer)",
@@ -31,23 +31,25 @@
       "status": "ANALYSIS_COMPLETE"
     },
     "flight_actuation": {
-      "action": "browser.click",
-      "target_element": "btn-stage-sep",
-      "reasoning": "FlightOps: Triggered Stage 1 Booster Separation based on nominal altitude > 50km."
+      "action": "browser.done",
+      "target_element": null,
+      "reasoning": "FlightOps: No physical actuation requested."
     },
     "comms_dispatch": {
       "agent": "COMMS-4 (Mission Intelligence & Dispatch Officer)",
-      "recipient": "arnav.goyal0713@gmail.com",
+      "recipient": "lm10arnav@gmail.com",
       "dispatch_info": {
-        "recipient": "arnav.goyal0713@gmail.com",
+        "recipient": "lm10arnav@gmail.com",
         "subject": "FABLE / ISRO LVM3-M4 Launch Telemetry & Flight Test Report",
-        "smtp_sent": false,
-        "smtp_error": "(535, b'5.7.8 Username and Password not accepted. For more information, go to\\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5a478bee46e88-3286f959575sm6446779eec.15 - gsmtp')",
+        "smtp_configured": true,
+        "smtp_sent": true,
+        "smtp_error_code": null,
+        "smtp_error": null,
         "outbox_html": "C:\\Users\\yousi\\OneDrive\\Documents\\fable\\privacy-agent\\outbox\\latest_flight_report.html",
         "outbox_eml": "C:\\Users\\yousi\\OneDrive\\Documents\\fable\\privacy-agent\\outbox\\latest_flight_report.eml",
-        "status": "saved_to_outbox"
+        "status": "delivered_to_smtp"
       },
-      "status": "saved_to_outbox"
+      "status": "delivered_to_smtp"
     },
     "security_audit": {
       "agent": "AUDITOR-5 (Security & Policy Sentinel)",

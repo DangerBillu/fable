@@ -19,6 +19,7 @@ from agent.ollama import OllamaClient
 from agent.planner import Planner
 from mcp.gateway import McpGateway
 from runtime.audit import AuditLogger
+from runtime.comms.email_sender import load_project_env
 from runtime.perception import TelemetryExtractor
 from runtime.policy import PolicyEngine
 from runtime.privacy import FaceDetector, ImageRedactor, PrivacyDetector, PrivacyFirewall, VisualClassifier
@@ -69,8 +70,9 @@ class ObservationPayload(BaseModel):
     face_regions: list[FaceRegionPayload] = Field(default_factory=list)
 
 
+load_project_env()
 vault = TokenVault()
-app = FastAPI(title="Privacy Agent Runtime", version="0.2.0")
+app = FastAPI(title="Fable Runtime", version="0.2.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://127.0.0.1", "http://localhost", "chrome-extension://*"],
@@ -174,4 +176,3 @@ if __name__ == "__main__":
 
     port = int(os.getenv("PORT", os.getenv("RUNTIME_PORT", "8000")))
     uvicorn.run(app, host="127.0.0.1", port=port)
-

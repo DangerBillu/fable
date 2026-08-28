@@ -1,6 +1,6 @@
-# Privacy Agent
+# Fable
 
-Local, privacy-first browser agent MVP. The product principle is a privacy firewall surrounding a computer-use agent: the model sees sanitized state, and the policy engine controls actions.
+Local, privacy-first browser assistant. Fable reads the current page, redacts sensitive data, plans safe browser actions, and can email sanitized summaries through SMTP or the local outbox.
 
 ## Phase 1 Contents
 
@@ -13,7 +13,7 @@ Local, privacy-first browser agent MVP. The product principle is a privacy firew
 - Independent policy engine.
 - MCP-style gateway that only accepts approved actions.
 - Privacy-preserving audit log.
-- Synthetic demo page at `demo/company-dashboard.html`.
+- Article summary email flow for real reading workflows.
 
 ## Run
 
@@ -49,7 +49,13 @@ cd C:\Users\yousi\OneDrive\Documents\fable\privacy-agent
 python -m runtime.stdlib_server
 ```
 
-Load `privacy-agent/extension` as an unpacked Chrome extension, open `demo/company-dashboard.html`, and start the agent from the extension popup with the goal `Open the settings page.`
+Load `privacy-agent/extension` as an unpacked Chrome extension. Open an article in Chrome, then run this task from the Fable popup:
+
+```text
+Summarize this article and email it to me
+```
+
+You can also open `demo/company-dashboard.html` and run `Open the settings page.` to test browser actions.
 
 Ollama is optional:
 
@@ -70,4 +76,4 @@ cd C:\Users\yousi\OneDrive\Documents\fable\privacy-agent
 python -m unittest discover -s tests
 ```
 
-The tests focus on false negatives for known sensitive patterns, tokenization, prompt-injection separation, policy gating, MCP token resolution, and the company-dashboard demo path.
+The tests focus on false negatives for known sensitive patterns, tokenization, prompt-injection separation, policy gating, MCP token resolution, browser actions, and article summary emails.

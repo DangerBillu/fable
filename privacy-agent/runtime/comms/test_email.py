@@ -13,24 +13,24 @@ from runtime.comms.email_sender import EmailSender, load_project_env
 
 def main():
     load_project_env()
-    recipient = sys.argv[1] if len(sys.argv) > 1 else os.getenv("SMTP_USER", "")
+    sender = EmailSender()
+    recipient = sys.argv[1] if len(sys.argv) > 1 else sender.smtp_user
     if not recipient:
         print("Usage: python -m runtime.comms.test_email your_email@gmail.com")
         print("\nChecking your current .env settings:")
-        print(f"  SMTP_HOST     : {os.getenv('SMTP_HOST', '(empty)')}")
-        print(f"  SMTP_USER     : {os.getenv('SMTP_USER', '(empty)')}")
+        print(f"  SMTP_HOST     : {sender.smtp_host or '(empty)'}")
+        print(f"  SMTP_USER     : {sender.smtp_user or '(empty)'}")
         print(f"  SMTP_PASSWORD : {'*' * len(os.getenv('SMTP_PASSWORD', '')) if os.getenv('SMTP_PASSWORD') else '(empty)'}")
         return
 
     print("=" * 65)
-    print("[ISRO J.A.R.V.I.S. EMAIL DISPATCH TESTER]")
+    print("[FABLE EMAIL DISPATCH TESTER]")
     print("=" * 65)
     print(f"Target Recipient : {recipient}")
-    print(f"SMTP Host        : {os.getenv('SMTP_HOST', '(not configured)')}")
-    print(f"SMTP User        : {os.getenv('SMTP_USER', '(not configured)')}")
+    print(f"SMTP Host        : {sender.smtp_host or '(not configured)'}")
+    print(f"SMTP User        : {sender.smtp_user or '(not configured)'}")
     print("=" * 65)
 
-    sender = EmailSender()
     res = sender.send_telemetry_email(
         recipient=recipient,
         subject="ISRO LVM3-M4 Live Test Dispatch",
@@ -53,12 +53,20 @@ def main():
         print("Check your inbox (and spam/promotions folder).")
     else:
         print("\n[ERROR / NOTICE] Email was NOT sent over the internet.")
+        if res.get("smtp_error_code"):
+            print(f"  SMTP Status: {res['smtp_error_code']}")
         if res.get("smtp_error"):
             print(f"  SMTP Error: {res['smtp_error']}")
-        print("\nTo send real emails to your Gmail/Outlook inbox:")
-        print("  1. Open the .env file in your editor.")
-        print("  2. Fill in SMTP_HOST, SMTP_USER, and SMTP_PASSWORD.")
-        print("  3. Run this command again.")
+        if res.get("smtp_error_code") == "smtp_blocked":
+            print("\nYour SMTP settings are present, but this process was blocked from opening a network socket.")
+            print("Run the tester outside a restricted sandbox or allow network access for this command.")
+        elif res.get("smtp_error_code") == "smtp_auth_failed":
+            print("\nGmail rejected the login. Regenerate a Gmail App Password and put it in SMTP_PASSWORD.")
+        else:
+            print("\nTo send real emails to your Gmail/Outlook inbox:")
+            print("  1. Open the .env file in your editor.")
+            print("  2. Fill in SMTP_HOST, SMTP_USER, and SMTP_PASSWORD.")
+            print("  3. Run this command again.")
     print("=" * 65)
 
 

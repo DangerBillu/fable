@@ -1,9 +1,9 @@
 body {
   margin: 0;
-  width: 380px;
+  width: 420px;
   font: 13px/1.4 system-ui, -apple-system, Segoe UI, sans-serif;
-  color: #e2ece6;
-  background: #08120e;
+  color: #e7ece9;
+  background: #101412;
 }
 
 main {
@@ -26,28 +26,27 @@ footer,
   gap: 8px;
 }
 
-.isro-tag {
-  background: linear-gradient(135deg, #ff9933 0%, #138808 100%);
-  color: white;
+.brand-tag {
+  background: #d7f5e4;
+  color: #102016;
   padding: 2px 6px;
-  font-weight: 900;
+  font-weight: 800;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 h1 {
   margin: 0;
   font-size: 14px;
-  letter-spacing: 0.5px;
-  color: #00ff88;
+  color: #d7f5e4;
 }
 
 #status {
   padding: 3px 8px;
   border-radius: 6px;
-  color: #00ff88;
-  background: #0d281a;
-  border: 1px solid #14442b;
+  color: #d7f5e4;
+  background: #17241d;
+  border: 1px solid #2d4a3a;
   font-weight: bold;
 }
 
@@ -59,18 +58,23 @@ label {
   color: #a2c2b0;
 }
 
-input {
-  min-height: 32px;
-  border: 1px solid #1c3c2c;
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 92px;
+  max-height: 180px;
+  resize: vertical;
+  border: 1px solid #2b4035;
   border-radius: 4px;
-  padding: 0 9px;
+  padding: 9px;
   font: inherit;
-  background: #040907;
+  line-height: 1.4;
+  background: #080b0a;
   color: #ffffff;
 }
-input:focus {
+textarea:focus {
   outline: none;
-  border-color: #00ff88;
+  border-color: #7be2a7;
 }
 
 .presets {
@@ -80,9 +84,10 @@ input:focus {
 }
 
 .btn-preset {
-  background: #0d2217;
-  border: 1px solid #1b442e;
-  color: #8eddb2;
+  flex: 1;
+  background: #17201b;
+  border: 1px solid #2b4035;
+  color: #c6e6d4;
   font-size: 11px;
   padding: 4px 8px;
   border-radius: 4px;
@@ -91,7 +96,7 @@ input:focus {
   font-weight: 600;
 }
 .btn-preset:hover {
-  background: #143524;
+  background: #203328;
   color: #ffffff;
 }
 
@@ -100,7 +105,7 @@ input:focus {
 .stats,
 .boundary {
   margin-top: 10px;
-  border-top: 1px solid #142e20;
+  border-top: 1px solid #26332d;
   padding-top: 10px;
 }
 
@@ -112,7 +117,7 @@ input:focus {
 }
 
 .checks div:nth-child(even) {
-  color: #00ff88;
+  color: #9ce6bb;
   font-weight: 600;
 }
 
@@ -124,10 +129,10 @@ input:focus {
 
 .stats div {
   min-height: 48px;
-  border: 1px solid #142e20;
+  border: 1px solid #26332d;
   border-radius: 6px;
   padding: 6px;
-  background: #040907;
+  background: #080b0a;
   text-align: center;
 }
 
@@ -143,19 +148,19 @@ input:focus {
   display: block;
   margin-top: 3px;
   font-size: 16px;
-  color: #00ff88;
+  color: #9ce6bb;
 }
 
 .boundary div {
   flex: 1;
-  border: 1px solid #142e20;
+  border: 1px solid #26332d;
   border-radius: 6px;
   padding: 6px 8px;
-  background: #040907;
+  background: #080b0a;
   font-size: 11px;
 }
 .boundary div strong {
-  color: #ff9933;
+  color: #f0d078;
 }
 
 footer {
@@ -173,18 +178,22 @@ button#start, button#stop {
 }
 
 button#start {
-  color: #040907;
-  background: #00ff88;
+  color: #101412;
+  background: #9ce6bb;
   flex: 1;
 }
 button#start:hover {
-  background: #33ff9f;
+  background: #b8f0ce;
+}
+button#start:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 button#stop {
-  background: #551111;
-  color: #ff9999;
+  background: #321c1c;
+  color: #f2b5b5;
 }
 button#stop:hover {
-  background: #771a1a;
+  background: #462525;
 }

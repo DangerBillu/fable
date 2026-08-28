@@ -17,7 +17,7 @@ class McpTool:
 
 
 class McpRegistry:
-    """Central registry for all J.A.R.V.I.S. MCP tool servers."""
+    """Central registry for Fable MCP tool servers."""
 
     def __init__(self, vault: TokenVault) -> None:
         self.vault = vault
@@ -79,17 +79,37 @@ class McpRegistry:
         self.register(
             McpTool(
                 name="comms.transmit_telemetry_email",
-                description="Encrypted email dispatch of sanitized flight telemetry to mission authorities.",
+                description="Email dispatch of a sanitized telemetry report.",
                 parameters={
                     "type": "object",
                     "properties": {
                         "recipient": {"type": "string"},
                         "subject": {"type": "string"},
                         "sanitized_body": {"type": "string"},
+                        "telemetry": {"type": "object"},
                     },
                     "required": ["recipient"],
                 },
                 handler=self._handle_comms_email,
+            )
+        )
+        self.register(
+            McpTool(
+                name="comms.email_article_summary",
+                description="Email a sanitized summary of the current article or page.",
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "recipient": {"type": "string"},
+                        "subject": {"type": "string"},
+                        "article_title": {"type": "string"},
+                        "article_url": {"type": "string"},
+                        "summary": {"type": "string"},
+                        "source_excerpt": {"type": "string"},
+                    },
+                    "required": ["summary"],
+                },
+                handler=self._handle_article_summary_email,
             )
         )
 
@@ -134,9 +154,38 @@ class McpRegistry:
             "recipient": resolved_recipient,
             "subject": subject or "LVM3-M4 Launch Telemetry & Max-Q Stage Report",
             "dispatch": dispatch_result,
-            "status": "sent" if dispatch_result.get("smtp_sent") else "saved_to_outbox",
+            "status": dispatch_result.get("status", "saved_to_outbox"),
         }
 
+    def _handle_article_summary_email(
+        self,
+        recipient: str = "",
+        subject: str = "",
+        article_title: str = "",
+        article_url: str = "",
+        summary: str = "",
+        source_excerpt: str = "",
+        **kw,
+    ) -> dict:
+        from runtime.comms.email_sender import EmailSender
+
+        sender = EmailSender()
+        resolved_recipient = self.vault.resolve(recipient) if recipient and self.vault.has(recipient) else recipient
+        dispatch_result = sender.send_article_summary_email(
+            recipient=resolved_recipient,
+            subject=subject,
+            article_title=article_title,
+            article_url=article_url,
+            summary=summary,
+            source_excerpt=source_excerpt,
+        )
+        return {
+            "action": "done",
+            "recipient": dispatch_result["recipient"],
+            "subject": dispatch_result["subject"],
+            "dispatch": dispatch_result,
+            "status": dispatch_result.get("status", "saved_to_outbox"),
+        }
 
     def _handle_telemetry_analysis(self, altitude_km: float = 54.2, velocity_ms: float = 1824.5, dynamic_pressure_kpa: float = 34.8, **kw) -> dict:
         is_max_q_cleared = dynamic_pressure_kpa < 40.0

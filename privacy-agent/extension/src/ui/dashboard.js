@@ -9,7 +9,14 @@ window.setGoal = function(goalText) {
 };
 
 startButton.addEventListener("click", async () => {
-  await chrome.runtime.sendMessage({ type: "START_AGENT", goal: goalInput.value });
+  const goal = goalInput.value.trim();
+  if (!goal) {
+    goalInput.focus();
+    return;
+  }
+  startButton.disabled = true;
+  await chrome.runtime.sendMessage({ type: "START_AGENT", goal });
+  startButton.disabled = false;
   refresh();
 });
 
