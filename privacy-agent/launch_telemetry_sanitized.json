@@ -1,27 +1,67 @@
 {
-  "mission": "LVM3-M4 / ISRO ROCKET LAUNCH SIMULATION",
-  "jarvis_directive": "python jarvis.py \"JARVIS, email the flight test results to arnav.goyal0713@gmail.com\"",
-  "flight_phase": "STAGE-1 BOOSTER FLIGHT",
+  "mission": "FABLE / ISRO LVM3-M4 MISSION ORCHESTRATION",
+  "commander_directive": "FABLE, analyze flight telemetry, trigger stage separation, and email test results to arnav.goyal0713@gmail.com",
+  "army_of_agents": {
+    "privacy_shield": {
+      "agent": "SHIELD-1 (Privacy & Redaction Officer)",
+      "engine_cad_blurred": true,
+      "tokens_redacted": 2,
+      "classified_boxes": 0,
+      "face_count": 0,
+      "categories": [
+        "PHONE",
+        "PRIVATE_DOCUMENT"
+      ],
+      "status": "SANITIZED_STATE_CERTIFIED"
+    },
+    "flight_dynamics": {
+      "agent": "ANALYST-2 (Flight Dynamics Officer)",
+      "metrics": {
+        "altitude_km": 54.2,
+        "velocity_ms": 1824.5,
+        "mach": 5.42,
+        "dynamic_pressure_kpa": 34.8,
+        "propellant_remaining_pct": 71.8
+      },
+      "analysis": {
+        "max_q_status": "CLEARED / NOMINAL",
+        "staging_status": "GO_FOR_SEPARATION",
+        "recommendation": "Execute Stage 1 Booster Separation"
+      },
+      "status": "ANALYSIS_COMPLETE"
+    },
+    "flight_actuation": {
+      "action": "browser.click",
+      "target_element": "btn-stage-sep",
+      "reasoning": "FlightOps: Triggered Stage 1 Booster Separation based on nominal altitude > 50km."
+    },
+    "comms_dispatch": {
+      "agent": "COMMS-4 (Mission Intelligence & Dispatch Officer)",
+      "recipient": "arnav.goyal0713@gmail.com",
+      "dispatch_info": {
+        "recipient": "arnav.goyal0713@gmail.com",
+        "subject": "FABLE / ISRO LVM3-M4 Launch Telemetry & Flight Test Report",
+        "smtp_sent": false,
+        "smtp_error": "(535, b'5.7.8 Username and Password not accepted. For more information, go to\\n5.7.8  https://support.google.com/mail/?p=BadCredentials a92af1059eb24-142e41837c6sm4125417c88.11 - gsmtp')",
+        "outbox_html": "C:\\Users\\yousi\\OneDrive\\Documents\\fable\\privacy-agent\\outbox\\latest_flight_report.html",
+        "outbox_eml": "C:\\Users\\yousi\\OneDrive\\Documents\\fable\\privacy-agent\\outbox\\latest_flight_report.eml",
+        "status": "saved_to_outbox"
+      },
+      "status": "saved_to_outbox"
+    },
+    "security_audit": {
+      "agent": "AUDITOR-5 (Security & Policy Sentinel)",
+      "policy_decision": "ALLOW",
+      "leak_detected": false,
+      "policy_mode": "STRICT_DEFENSE",
+      "compliance": "100% ISRO DEFENSE COMPLIANT"
+    }
+  },
   "sanitized_telemetry": {
     "altitude_km": 54.2,
     "velocity_ms": 1824.5,
     "mach": 5.42,
     "dynamic_pressure_kpa": 34.8,
-    "wind_knots": 12.4,
-    "chamber_pressure_bar": 58.4,
     "propellant_remaining_pct": 71.8
-  },
-  "privacy_shield_status": {
-    "engine_cad_blurred": true,
-    "crypto_keys_redacted": 2,
-    "redaction_categories": [
-      "PHONE",
-      "PRIVATE_DOCUMENT"
-    ]
-  },
-  "mcp_action": {
-    "action": "click",
-    "element_id": "btn-send-telemetry-report"
-  },
-  "jarvis_reasoning": "Dispatched sanitized flight test telemetry report to arnav.goyal0713@gmail.com."
+  }
 }

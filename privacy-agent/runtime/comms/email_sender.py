@@ -10,15 +10,28 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def load_project_env() -> None:
+    """Ensure .env is parsed into os.environ."""
+    env_file = ROOT / ".env"
+    if env_file.exists():
+        for line in env_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                os.environ[k.strip()] = v.strip()
+
+
 class EmailSender:
     """Handles real SMTP email delivery and local outbox file generation."""
 
     def __init__(self) -> None:
-        self.smtp_host = os.getenv("SMTP_HOST", "")
+        load_project_env()
+        self.smtp_host = os.getenv("SMTP_HOST", "").strip()
         self.smtp_port = int(os.getenv("SMTP_PORT", "587"))
-        self.smtp_user = os.getenv("SMTP_USER", "")
-        self.smtp_password = os.getenv("SMTP_PASSWORD", "")
-        self.smtp_from = os.getenv("SMTP_FROM", "ISRO Mission Control <mission-control@isro.gov.in>")
+        self.smtp_user = os.getenv("SMTP_USER", "").strip()
+        # Strip all whitespace/spaces from app passwords (e.g., 'feqb qxqz eqvf saxw' -> 'feqbqxqzeqvfsaxw')
+        self.smtp_password = os.getenv("SMTP_PASSWORD", "").replace(" ", "").strip()
+        self.smtp_from = os.getenv("SMTP_FROM", f"Fable ISRO Mission Control <{self.smtp_user}>").strip()
         self.outbox_dir = ROOT / "outbox"
         self.outbox_dir.mkdir(exist_ok=True)
 
@@ -36,7 +49,7 @@ class EmailSender:
         html_body = self._build_html_report(recipient, subject, telemetry_data, raw_text)
         text_body = self._build_plain_text_report(recipient, subject, telemetry_data, raw_text)
 
-        # 1. Always save formatted HTML & EML to local outbox for instant verification
+        # 1. Always save formatted HTML & EML to local outbox
         html_file = self.outbox_dir / "latest_flight_report.html"
         eml_file = self.outbox_dir / "latest_flight_report.eml"
         
@@ -44,7 +57,7 @@ class EmailSender:
 
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = self.smtp_from
+        msg["From"] = self.smtp_from or self.smtp_user or "mission-control@isro.gov.in"
         msg["To"] = recipient
         msg.attach(MIMEText(text_body, "plain"))
         msg.attach(MIMEText(html_body, "html"))
@@ -56,12 +69,17 @@ class EmailSender:
         smtp_error = None
         if self.smtp_host and self.smtp_user and self.smtp_password:
             try:
-                with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=15) as server:
-                    server.ehlo()
-                    server.starttls()
-                    server.ehlo()
-                    server.login(self.smtp_user, self.smtp_password)
-                    server.sendmail(self.smtp_user, [recipient], msg.as_string())
+                if self.smtp_port == 465:
+                    with smtplib.SMTP_SSL(self.smtp_host, self.smtp_port, timeout=15) as server:
+                        server.login(self.smtp_user, self.smtp_password)
+                        server.sendmail(self.smtp_user, [recipient], msg.as_string())
+                else:
+                    with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=15) as server:
+                        server.ehlo()
+                        server.starttls()
+                        server.ehlo()
+                        server.login(self.smtp_user, self.smtp_password)
+                        server.sendmail(self.smtp_user, [recipient], msg.as_string())
                 smtp_sent = True
             except Exception as exc:
                 smtp_error = str(exc)
