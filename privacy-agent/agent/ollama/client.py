@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
@@ -15,11 +16,32 @@ class OllamaClient:
     model: str = os.getenv("OLLAMA_MODEL", "qwen3:8b")
     vision_model: str = os.getenv("VISION_MODEL", "llava")
 
+    def _resolve_available_model(self) -> str:
+        """Query Ollama /api/tags to pick an installed model if the default is not pulled."""
+        try:
+            req = urllib.request.Request(f"{self.base_url.rstrip('/')}/api/tags", method="GET")
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                models = [m.get("name", "") for m in data.get("models", [])]
+                if self.model in models or any(self.model.split(":")[0] in m for m in models):
+                    return self.model
+                if models:
+                    # Pick the first non-vision model available
+                    for m in models:
+                        if "llava" not in m:
+                            return m
+                    return models[0]
+        except Exception:
+            pass
+        return self.model
+
     def generate_json(self, state: SanitizedState, user_instruction: str) -> dict:
         if getattr(state, "_sanitized_marker", None) != "SANITIZED_STATE":
             raise TypeError("OllamaClient only accepts SanitizedState")
+        
+        active_model = self._resolve_available_model()
         payload = {
-            "model": self.model,
+            "model": active_model,
             "stream": False,
             "format": "json",
             "prompt": self._prompt(state, user_instruction),
@@ -30,10 +52,10 @@ class OllamaClient:
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(request, timeout=45) as response:
             data = json.loads(response.read().decode("utf-8"))
         raw = data.get("response", "{}")
-        return json.loads(raw)
+        return self._extract_json(raw)
 
     def analyze_screenshot(self, screenshot_b64: str, state: SanitizedState, user_instruction: str) -> dict:
         if getattr(state, "_sanitized_marker", None) != "SANITIZED_STATE":
@@ -50,7 +72,7 @@ class OllamaClient:
             prompt = prompt_template.format(
                 goal=user_instruction,
                 redacted_count=state.privacy.get("redacted", 0),
-                face_count=state.privacy.get("faces", 0),
+                face_count=state.privacy.get("face_count", 0),
                 findings_count=state.privacy.get("findings", 0),
                 elements_list=json.dumps(list(state.elements), ensure_ascii=False)
             )
@@ -72,7 +94,7 @@ class OllamaClient:
             with urllib.request.urlopen(request, timeout=60) as response:
                 data = json.loads(response.read().decode("utf-8"))
             raw = data.get("response", "{}")
-            return json.loads(raw)
+            return self._extract_json(raw)
         except Exception:
             return {}
 
@@ -84,10 +106,39 @@ class OllamaClient:
             )
             with urllib.request.urlopen(request, timeout=10) as response:
                 data = json.loads(response.read().decode("utf-8"))
-            models = [m.get("name") for m in data.get("models", [])]
-            return any(self.vision_model in m for m in models)
+            models = [m.get("name", "") for m in data.get("models", [])]
+            return any(self.vision_model.split(":")[0] in m for m in models)
         except Exception:
             return False
+
+    def is_ollama_running(self) -> bool:
+        """Check if local Ollama server is reachable on base_url."""
+        try:
+            req = urllib.request.Request(f"{self.base_url.rstrip('/')}/api/tags", method="GET")
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                return resp.status == 200
+        except Exception:
+            return False
+
+    def _extract_json(self, raw_text: str) -> dict:
+        """Safely parse JSON from raw model string even if wrapped in markdown blocks."""
+        text = raw_text.strip()
+        # Remove ```json ... ``` code fences
+        fence_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+        if fence_match:
+            text = fence_match.group(1)
+        try:
+            return json.loads(text)
+        except Exception:
+            # Try finding first { and last }
+            start = text.find("{")
+            end = text.rfind("}")
+            if start != -1 and end != -1 and end > start:
+                try:
+                    return json.loads(text[start : end + 1])
+                except Exception:
+                    pass
+            return {}
 
     def _prompt(self, state: SanitizedState, user_instruction: str) -> str:
         prompts_dir = Path(__file__).parent.parent / "prompts"
@@ -104,7 +155,7 @@ class OllamaClient:
                 privacy_mode=state.privacy.get("mode", "strict"),
                 findings_count=state.privacy.get("findings", 0),
                 redacted_count=state.privacy.get("redacted", 0),
-                face_count=state.privacy.get("faces", 0),
+                face_count=state.privacy.get("face_count", 0),
                 elements_list=json.dumps(list(state.elements), ensure_ascii=False),
                 visible_text=state.visible_text,
                 step_number=1,
@@ -128,6 +179,4 @@ def state_to_dict(state: SanitizedState) -> dict:
         "elements": list(state.elements),
         "visible_text": state.visible_text,
         "privacy": state.privacy,
-        "telemetry": state.telemetry,
-        "ui_state": state.ui_state,
     }

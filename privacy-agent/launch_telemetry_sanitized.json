@@ -1,0 +1,27 @@
+{
+  "mission": "LVM3-M4 / ISRO ROCKET LAUNCH SIMULATION",
+  "jarvis_directive": "JARVIS, trigger stage separation and email the flight test results to director@isro.gov.in",
+  "flight_phase": "STAGE-1 BOOSTER FLIGHT",
+  "sanitized_telemetry": {
+    "altitude_km": 54.2,
+    "velocity_ms": 1824.5,
+    "mach": 5.42,
+    "dynamic_pressure_kpa": 34.8,
+    "wind_knots": 12.4,
+    "chamber_pressure_bar": 58.4,
+    "propellant_remaining_pct": 71.8
+  },
+  "privacy_shield_status": {
+    "engine_cad_blurred": true,
+    "crypto_keys_redacted": 2,
+    "redaction_categories": [
+      "PHONE",
+      "PRIVATE_DOCUMENT"
+    ]
+  },
+  "mcp_action": {
+    "action": "click",
+    "element_id": "btn-stage-sep"
+  },
+  "jarvis_reasoning": "Triggered Stage Separation on rocket launch console."
+}

@@ -2,52 +2,63 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Privacy Agent</title>
+    <title>ISRO Privacy Agent - Launch Control</title>
     <link rel="stylesheet" href="dashboard.css" />
   </head>
   <body>
     <main>
       <header>
-        <h1>PRIVACY AGENT</h1>
+        <div class="header-title">
+          <span class="isro-tag">ISRO</span>
+          <h1>PRIVACY AGENT</h1>
+        </div>
         <span id="status">Protected</span>
       </header>
+      
       <label>
-        Goal
-        <input id="goal" value="Open the settings page." />
+        Mission Instruction / Goal
+        <input id="goal" value="Monitor launch telemetry and trigger stage separation when altitude > 50km" />
       </label>
-      <div class="mode">
-        <span>Current mode</span>
-        <strong>STRICT</strong>
+
+      <!-- Quick Preset Buttons -->
+      <div class="presets">
+        <button type="button" class="btn-preset" onclick="setGoal('Trigger stage separation on launch console')">🚀 Stage Sep</button>
+        <button type="button" class="btn-preset" onclick="setGoal('Recalibrate engine gimbal on launch console')">📐 Gimbal</button>
+        <button type="button" class="btn-preset" onclick="setGoal('Jettison payload fairing')">🛡️ Fairing</button>
       </div>
+
+      <div class="mode">
+        <span>Active Profile</span>
+        <strong>ISRO STRICT DEFENSE</strong>
+      </div>
+
       <section class="checks">
-        <div>DOM</div><div>local</div>
-        <div>OCR</div><div>local optional</div>
-        <div>Privacy detection</div><div>local</div>
-        <div>Redaction</div><div>local</div>
-        <div>Face Detection</div><div>in-browser</div>
-        <div>VLM</div><div>localhost optional</div>
-        <div>HuggingFace</div><div>cloud fallback</div>
-        <div>Ollama</div><div>localhost</div>
-        <div>MCP</div><div>policy gated</div>
+        <div>Engine Blueprint Redaction</div><div>active</div>
+        <div>Telemetry Screening</div><div>realtime 20Hz</div>
+        <div>Face Detection & Blur</div><div>in-browser</div>
+        <div>Offline Reasoning Client</div><div>localhost</div>
+        <div>Policy Firewall (MCP)</div><div>fail-closed</div>
       </section>
+
       <section class="stats">
         <div><span>Screenshots</span><strong id="screenshots">0</strong></div>
-        <div><span>Faces Blurred</span><strong id="facesBlurred">0</strong></div>
-        <div><span>Redacted</span><strong id="redacted">0</strong></div>
-        <div><span>Tokenized</span><strong id="tokenized">0</strong></div>
+        <div><span>Engine Blurred</span><strong id="facesBlurred">0</strong></div>
+        <div><span>Tokens Redacted</span><strong id="tokenized">0</strong></div>
+        <div><span>Classified Boxes</span><strong id="redacted">0</strong></div>
         <div><span>Blocked</span><strong id="blocked">0</strong></div>
         <div><span>Approved</span><strong id="approved">0</strong></div>
       </section>
+
       <section class="boundary">
-        <div><strong>RAW DATA</strong><span>LOCAL ONLY</span></div>
-        <div><strong>SANITIZED DATA</strong><span>SENT TO REASONING MODEL</span></div>
+        <div><strong>RAW CAD / CRYPTO</strong><span>LOCAL ONLY</span></div>
+        <div><strong>SANITIZED TELEMETRY</strong><span>SENT TO REASONING MODEL</span></div>
       </section>
+
       <footer>
-        <button id="start">Start</button>
-        <button id="stop">Kill Agent</button>
+        <button id="start">Execute Mission Goal</button>
+        <button id="stop">Emergency Hold</button>
       </footer>
     </main>
     <script src="dashboard.js"></script>
   </body>
 </html>
-

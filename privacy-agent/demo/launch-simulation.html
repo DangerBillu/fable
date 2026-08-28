@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ISRO LVM3-M4 Launch Telemetry & Mission Simulation</title>
+    <style>
+      :root {
+        --bg-dark: #070d0b;
+        --panel-bg: #0e1a16;
+        --border-color: #1b382b;
+        --accent-green: #00ff88;
+        --accent-amber: #ffb703;
+        --accent-red: #ff3333;
+        --text-primary: #e0ece4;
+        --text-muted: #7c9a8b;
+        --classified-border: #8b1e1e;
+        --classified-bg: #1c0909;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', -apple-system, system-ui, Consolas, monospace;
+        background-color: var(--bg-dark);
+        color: var(--text-primary);
+        line-height: 1.4;
+      }
+      header {
+        background: #050a08;
+        border-bottom: 2px solid var(--border-color);
+        padding: 10px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .isro-badge {
+        background: linear-gradient(135deg, #ff9933 0%, #138808 100%);
+        color: white;
+        padding: 4px 10px;
+        font-weight: 900;
+        border-radius: 4px;
+        font-size: 13px;
+        letter-spacing: 1px;
+      }
+      .mission-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: var(--accent-green);
+      }
+      .top-status {
+        display: flex;
+        gap: 20px;
+        font-family: Consolas, monospace;
+      }
+      .time-ticker {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--accent-amber);
+      }
+      .classified-stamp {
+        background: var(--classified-bg);
+        border: 1px solid var(--classified-red, #e63946);
+        color: #ff6b6b;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+      
+      main {
+        max-width: 1400px;
+        margin: 16px auto;
+        padding: 0 16px;
+        display: grid;
+        grid-template-columns: 280px 1fr 340px;
+        gap: 16px;
+      }
+      
+      .card {
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 14px;
+        margin-bottom: 16px;
+      }
+      .card-header {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 6px;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* Telemetry Gauge Grid */
+      .telemetry-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .gauge-box {
+        background: #08120e;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 10px;
+        text-align: center;
+      }
+      .gauge-box.wide {
+        grid-column: span 2;
+      }
+      .gauge-title {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+      }
+      .gauge-val {
+        font-family: Consolas, monospace;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--accent-green);
+        margin: 4px 0;
+      }
+      .gauge-val.amber { color: var(--accent-amber); }
+      .gauge-val.red { color: var(--accent-red); }
+      .gauge-unit {
+        font-size: 10px;
+        color: var(--text-muted);
+      }
+
+      /* Canvas trajectory visualizer */
+      .canvas-container {
+        position: relative;
+        background: #040907;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        height: 240px;
+        overflow: hidden;
+      }
+      #trajectoryCanvas {
+        width: 100%;
+        height: 100%;
+      }
+      
+      /* Classified Engine CAD Card */
+      .classified-box {
+        border: 2px dashed #a83232;
+        background: #140505;
+        padding: 12px;
+        border-radius: 6px;
+        position: relative;
+      }
+      .classified-tag {
+        color: #ff6666;
+        font-size: 11px;
+        font-weight: 800;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .engine-img {
+        width: 100%;
+        height: 140px;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #731b1b;
+        display: block;
+        margin: 6px 0;
+      }
+      .secret-data {
+        font-family: Consolas, monospace;
+        font-size: 11px;
+        color: #ff9999;
+        background: #200707;
+        padding: 6px;
+        border-radius: 4px;
+        margin-top: 6px;
+      }
+
+      /* Flight Stage Progress */
+      .stage-step {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        border-radius: 4px;
+        background: #08120e;
+        border: 1px solid var(--border-color);
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
+      .stage-step.active {
+        border-color: var(--accent-green);
+        background: #092416;
+        font-weight: 700;
+      }
+      .stage-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #2c4438;
+      }
+      .stage-step.active .stage-indicator {
+        background: var(--accent-green);
+        box-shadow: 0 0 8px var(--accent-green);
+      }
+
+      /* Control buttons for AI Agent */
+      .controls-grid {
+        display: grid;
+        gap: 8px;
+      }
+      button.btn-action {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--accent-green);
+        border-radius: 4px;
+        background: #0a2e1d;
+        color: #ffffff;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      button.btn-action:hover {
+        background: #114d31;
+        border-color: #00ffaa;
+      }
+      button.btn-action.warning {
+        border-color: var(--accent-amber);
+        background: #2a2007;
+      }
+      button.btn-action.danger {
+        border-color: var(--accent-red);
+        background: #330b0b;
+      }
+      
+      /* Event logs */
+      .event-log {
+        height: 130px;
+        overflow-y: auto;
+        background: #040907;
+        padding: 8px;
+        font-family: Consolas, monospace;
+        font-size: 11px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+      }
+      .log-entry {
+        margin-bottom: 4px;
+        color: var(--text-muted);
+      }
+      .log-entry.success { color: var(--accent-green); }
+      .log-entry.warn { color: var(--accent-amber); }
+      .log-entry.classified { color: #ff6b6b; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo-group">
+        <span class="isro-badge">ISRO</span>
+        <span class="mission-title">LVM3-M4 / CHANDRAYAAN LAUNCH TELEMETRY</span>
+      </div>
+      <div class="top-status">
+        <span class="classified-stamp">RESTRICTED // SECRET LAUNCH PROTOCOL</span>
+        <div>T-PLUS: <span class="time-ticker" id="met-timer">T+ 00:02:15</span></div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Left Column: Flight Stages & Classified Rocket Design -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <span>Flight Sequence Status</span>
+            <span style="color: var(--accent-green);" id="flight-status">PROPULSION PHASE</span>
+          </div>
+          <div class="stage-step" id="stage-s200">
+            <span>Stage 1: S200 Solid Boosters</span>
+            <span class="stage-indicator"></span>
+          </div>
+          <div class="stage-step active" id="stage-l110">
+            <span>Stage 2: L110 Liquid Core</span>
+            <span class="stage-indicator"></span>
+          </div>
+          <div class="stage-step" id="stage-c25">
+            <span>Stage 3: C25 Cryogenic Upper</span>
+            <span class="stage-indicator"></span>
+          </div>
+          <div class="stage-step" id="stage-fairing">
+            <span>Payload Fairing (Ogive)</span>
+            <span class="stage-indicator"></span>
+          </div>
+        </div>
+
+        <!-- Confidential CAD / Engine Schematic Box (Target for Redaction) -->
+        <div class="classified-box">
+          <div class="classified-tag">
+            <span>🔒 CLASSIFIED: CE-20 CRYOGENIC ENGINE NOZZLE CAD</span>
+          </div>
+          <!-- Engine Photo for Redaction -->
+          <img 
+            id="engine-schematic"
+            class="engine-img"
+            src="https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?w=400&auto=format&fit=crop&q=80"
+            alt="CE-20 Engine Design Blueprint"
+            crossorigin="anonymous"
+          />
+          <div class="secret-data">
+            <strong>SPEC NO:</strong> CE20-ISRO-CONFIDENTIAL-992<br/>
+            <strong>CHAMBER TOLERANCE:</strong> ±0.002mm INCONEL-718<br/>
+            <strong>CRYPTO TELEMETRY KEY:</strong> KEY-9948271039481726<br/>
+            <strong>TARGET ORBIT:</strong> GTO 170x36500km @ 21.3°
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Column: Live Dynamic Telemetry Stream & Trajectory -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <span>Live Mission Telemetry Gauges</span>
+            <span style="color: var(--accent-green);">STREAM 20Hz ACTIVE</span>
+          </div>
+          <div class="telemetry-grid">
+            <div class="gauge-box">
+              <div class="gauge-title">Altitude / Elevation</div>
+              <div class="gauge-val" id="val-altitude">54.20</div>
+              <div class="gauge-unit">KILOMETERS (km)</div>
+            </div>
+            <div class="gauge-box">
+              <div class="gauge-title">Velocity / Speed</div>
+              <div class="gauge-val" id="val-velocity">1,824.5</div>
+              <div class="gauge-unit">METERS/SEC (m/s)</div>
+            </div>
+            <div class="gauge-box">
+              <div class="gauge-title">Mach Number</div>
+              <div class="gauge-val amber" id="val-mach">Mach 5.42</div>
+              <div class="gauge-unit">SUPERSONIC REGIME</div>
+            </div>
+            <div class="gauge-box">
+              <div class="gauge-title">Dynamic Pressure (Q)</div>
+              <div class="gauge-val" id="val-pressure">34.80</div>
+              <div class="gauge-unit">KILOPASCALS (kPa)</div>
+            </div>
+            <div class="gauge-box">
+              <div class="gauge-title">Chamber Pressure</div>
+              <div class="gauge-val" id="val-chamber">58.4</div>
+              <div class="gauge-unit">BAR (Nominal)</div>
+            </div>
+            <div class="gauge-box">
+              <div class="gauge-title">Cross-Wind Shear</div>
+              <div class="gauge-val" id="val-wind">12.4</div>
+              <div class="gauge-unit">KNOTS @ 042°</div>
+            </div>
+            <div class="gauge-box wide">
+              <div class="gauge-title">Core Propellant Mass Remaining</div>
+              <div class="gauge-val" id="val-propellant">71.8 % (78,920 kg)</div>
+              <div class="gauge-unit">L110 UDMH + N2O4 PROPELLANT CORE</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span>Real-Time Trajectory Tracking Canvas</span>
+            <span>DOWNRANGE: <strong id="val-downrange">112.4 km</strong></span>
+          </div>
+          <div class="canvas-container">
+            <canvas id="trajectoryCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Flight Commands (Agent Operates) & Console Log -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <span>Mission Control Actions</span>
+            <span>AUTH: SCIENTIST-LEVEL-1</span>
+          </div>
+          <div class="controls-grid">
+            <button 
+              id="btn-stage-sep" 
+              class="btn-action"
+              onclick="executeCommand('STAGE_SEPARATION', 'Stage 1 Booster Separation initiated successfully.')"
+            >
+              <span>🚀 Trigger Stage Separation</span>
+              <span>[L110/S200]</span>
+            </button>
+            <button 
+              id="btn-fairing-jettison" 
+              class="btn-action"
+              onclick="executeCommand('FAIRING_JETTISON', 'Payload Fairing separation executed at altitude.')"
+            >
+              <span>🛡️ Jettison Payload Fairing</span>
+              <span>[>115 km]</span>
+            </button>
+            <button 
+              id="btn-gimbal-recal" 
+              class="btn-action warning"
+              onclick="executeCommand('GIMBAL_ADJUST', 'Nozzle Gimbal angle trimmed by +0.8 degrees.')"
+            >
+              <span>📐 Recalibrate Engine Gimbal</span>
+              <span>[Pitch +0.8°]</span>
+            </button>
+            <button 
+              id="btn-telemetry-hold" 
+              class="btn-action danger"
+              onclick="executeCommand('TELEMETRY_HOLD', 'Flight Telemetry frozen for security audit.')"
+            >
+              <span>⚠️ Emergency Telemetry Hold</span>
+              <span>[Audit]</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Telemetry Email Dispatch & Test Report Module -->
+        <div class="card">
+          <div class="card-header">
+            <span>Official Telemetry Email Dispatch</span>
+            <span style="color: var(--accent-green);">ENCRYPTED TLS</span>
+          </div>
+          <form id="telemetry-email-form" onsubmit="handleSendTelemetryEmail(event)" style="display: grid; gap: 8px;">
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">Recipient Authority</label>
+              <input 
+                type="email" 
+                id="telemetry-email-to" 
+                name="recipient" 
+                value="mission-control@isro.gov.in"
+                placeholder="authority@isro.gov.in"
+                style="width: 100%; background: #040907; border: 1px solid var(--border-color); color: #fff; padding: 6px 8px; border-radius: 4px; font-family: inherit; font-size: 12px;"
+                required
+              />
+            </div>
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">Subject Line</label>
+              <input 
+                type="text" 
+                id="telemetry-email-subject" 
+                name="subject" 
+                value="LVM3-M4 Launch Telemetry & Max-Q Stage Report"
+                style="width: 100%; background: #040907; border: 1px solid var(--border-color); color: #fff; padding: 6px 8px; border-radius: 4px; font-family: inherit; font-size: 12px;"
+                required
+              />
+            </div>
+            <div>
+              <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 2px;">Sanitized Telemetry Report</label>
+              <textarea 
+                id="telemetry-email-body" 
+                name="body" 
+                rows="3"
+                style="width: 100%; background: #040907; border: 1px solid var(--border-color); color: var(--accent-green); padding: 6px 8px; border-radius: 4px; font-family: Consolas, monospace; font-size: 11px;"
+              >Mission: LVM3-M4. MET: T+00:02:15. Alt: 54.2km. Velocity: 1824.5 m/s (Mach 5.42). Dynamic Pressure: 34.8 kPa. Core Propellant: 71.8%. Chamber: 58.4 bar. [All confidential engine CAD redacted].</textarea>
+            </div>
+            <button 
+              type="submit" 
+              id="btn-send-telemetry-report" 
+              class="btn-action"
+              style="border-color: #00ff88; background: #0a3d24; justify-content: center;"
+            >
+              <span>📧 Transmit Telemetry Test Report</span>
+            </button>
+          </form>
+          <div id="email-dispatch-status" style="display: none; margin-top: 6px; padding: 6px; background: #0c2b1a; border: 1px solid #00ff88; border-radius: 4px; font-size: 11px; color: #a1fcd1;">
+            ✓ Telemetry report encrypted & dispatched to recipient!
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span>Mission Telemetry Event Log</span>
+            <span style="color: var(--accent-green);">LIVE</span>
+          </div>
+          <div class="event-log" id="event-log-box">
+            <div class="log-entry">[T+00:00:00] S200 Boosters ignited at Sriharikota Pad-2.</div>
+            <div class="log-entry">[T+00:01:48] Max-Q passed. Dynamic pressure nominal.</div>
+            <div class="log-entry success">[T+00:02:10] L110 core liquid stage active.</div>
+            <div class="log-entry classified">[SECURITY] CE-20 Engine CAD tagged as RESTRICTED.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      let seconds = 135;
+      let altitude = 54.2;
+      let velocity = 1824.5;
+      let mach = 5.42;
+      let downrange = 112.4;
+      let propellant = 71.8;
+      let pressure = 34.8;
+      let wind = 12.4;
+      let isHold = false;
+
+      // Real-time animated ticker updating dynamic data points
+      setInterval(() => {
+        if (isHold) return;
+        seconds += 0.25;
+        altitude += 0.12;
+        velocity += 2.8;
+        mach = (velocity / 340).toFixed(2);
+        downrange += 0.25;
+        propellant = Math.max(0, propellant - 0.05);
+        pressure = Math.max(0.5, pressure - 0.08);
+        wind = (12.0 + Math.sin(seconds) * 2.5).toFixed(1);
+
+        // Update DOM elements
+        const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const secs = String(Math.floor(seconds % 60)).padStart(2, '0');
+        document.getElementById('met-timer').textContent = `T+ ${mins}:${secs}`;
+        document.getElementById('val-altitude').textContent = altitude.toFixed(2);
+        document.getElementById('val-velocity').textContent = velocity.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        document.getElementById('val-mach').textContent = `Mach ${mach}`;
+        document.getElementById('val-pressure').textContent = pressure.toFixed(2);
+        document.getElementById('val-wind').textContent = wind;
+        document.getElementById('val-propellant').textContent = `${propellant.toFixed(1)} % (${Math.round(propellant * 1100)} kg)`;
+        document.getElementById('val-downrange').textContent = `${downrange.toFixed(1)} km`;
+
+        drawTrajectory();
+      }, 250);
+
+      // Trajectory canvas render
+      const canvas = document.getElementById('trajectoryCanvas');
+      const ctx = canvas.getContext('2d');
+
+      function drawTrajectory() {
+        if (!canvas.width || canvas.width !== canvas.clientWidth) {
+          canvas.width = canvas.clientWidth;
+          canvas.height = canvas.clientHeight;
+        }
+        ctx.fillStyle = '#040907';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Grid lines
+        ctx.strokeStyle = '#0e241b';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 40) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += 30) {
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+
+        // Flight trajectory arc
+        ctx.strokeStyle = '#00ff88';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(20, canvas.height - 20);
+        const progress = Math.min(1, (altitude - 10) / 120);
+        const currentX = 20 + progress * (canvas.width - 60);
+        const currentY = (canvas.height - 20) - Math.pow(progress, 0.8) * (canvas.height - 50);
+
+        ctx.quadraticCurveTo(
+          canvas.width * 0.4,
+          canvas.height - 20,
+          currentX,
+          currentY
+        );
+        ctx.stroke();
+
+        // Current rocket beacon
+        ctx.fillStyle = '#ffb703';
+        ctx.beginPath();
+        ctx.arc(currentX, currentY, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowColor = '#00ff88';
+        ctx.shadowBlur = 10;
+      }
+
+      function executeCommand(actionKey, message) {
+        if (actionKey === 'TELEMETRY_HOLD') {
+          isHold = !isHold;
+        }
+        if (actionKey === 'STAGE_SEPARATION') {
+          document.getElementById('stage-s200').classList.remove('active');
+          document.getElementById('stage-l110').classList.add('active');
+        }
+        if (actionKey === 'FAIRING_JETTISON') {
+          document.getElementById('stage-fairing').classList.add('active');
+        }
+
+        const logBox = document.getElementById('event-log-box');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry success';
+        const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const secs = String(Math.floor(seconds % 60)).padStart(2, '0');
+        entry.textContent = `[T+${mins}:${secs}] [AGENT ACTION] ${message}`;
+        logBox.appendChild(entry);
+        logBox.scrollTop = logBox.scrollHeight;
+      }
+
+      function handleSendTelemetryEmail(event) {
+        if (event) event.preventDefault();
+        const to = document.getElementById('telemetry-email-to').value;
+        const subject = document.getElementById('telemetry-email-subject').value;
+        const body = document.getElementById('telemetry-email-body').value;
+        
+        console.log("Transmitting official telemetry email:", { to, subject, body });
+        
+        const statusBox = document.getElementById('email-dispatch-status');
+        if (statusBox) {
+          statusBox.style.display = 'block';
+          statusBox.textContent = `✓ Flight report transmitted to ${to} (Subject: "${subject}")`;
+          setTimeout(() => { statusBox.style.display = 'none'; }, 6000);
+        }
+        
+        executeCommand('TELEMETRY_REPORT_DISPATCH', `Dispatched flight telemetry report to ${to}`);
+        return false;
+      }
+    </script>
+  </body>
+</html>

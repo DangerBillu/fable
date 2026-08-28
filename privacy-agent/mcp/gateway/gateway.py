@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
 
+from mcp.registry import McpRegistry
 from runtime.state import ApprovedAction, BrowserAction, PolicyDecision
 from runtime.tokenization import TokenVault
 
@@ -9,6 +11,10 @@ from runtime.tokenization import TokenVault
 @dataclass
 class McpGateway:
     vault: TokenVault
+    registry: McpRegistry = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.registry = McpRegistry(self.vault)
 
     def browser_command(self, approved: ApprovedAction) -> dict:
         if approved.decision != PolicyDecision.ALLOW:
@@ -33,6 +39,13 @@ class McpGateway:
             command["action"] = "done"
         return command
 
+    def execute_tool(self, tool_name: str, **kwargs) -> dict[str, Any]:
+        """Execute a registered J.A.R.V.I.S. MCP tool."""
+        tool = self.registry.get_tool(tool_name)
+        if not tool:
+            raise KeyError(f"MCP Tool not found: {tool_name}")
+        return tool.handler(**kwargs)
+
     def _resolve_tokens(self, text: str) -> str:
         resolved = text
         for word in text.split():
@@ -40,4 +53,3 @@ class McpGateway:
             if self.vault.has(token):
                 resolved = resolved.replace(token, self.vault.resolve(token))
         return resolved
-

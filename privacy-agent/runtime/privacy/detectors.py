@@ -27,6 +27,8 @@ PATTERN_RULES = (
     PatternRule(SensitiveCategory.IDENTIFICATION_NUMBER, ClassificationLevel.RESTRICTED, re.compile(r"\b\d{4}\s?\d{4}\s?\d{4}\b"), 0.85),  # Aadhaar
     PatternRule(SensitiveCategory.IDENTIFICATION_NUMBER, ClassificationLevel.RESTRICTED, re.compile(r"\b[A-Z]{5}\d{4}[A-Z]\b"), 0.95),  # PAN
     PatternRule(SensitiveCategory.IDENTIFICATION_NUMBER, ClassificationLevel.RESTRICTED, re.compile(r"\b[A-Z]\d{7}\b"), 0.80),  # Indian passport
+    PatternRule(SensitiveCategory.SECRET, ClassificationLevel.SECRET, re.compile(r"\bKEY-[0-9]{12,20}\b"), 0.99),  # Telemetry Crypto Key
+    PatternRule(SensitiveCategory.PRIVATE_DOCUMENT, ClassificationLevel.SECRET, re.compile(r"\bCE20-ISRO-CONFIDENTIAL-[A-Z0-9-]+\b", re.I), 0.98),  # Engine CAD Specs
 )
 
 SENSITIVE_FIELD_RE = re.compile(

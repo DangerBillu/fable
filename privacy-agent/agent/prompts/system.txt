@@ -22,6 +22,11 @@ Available actions:
 - browser.wait: Wait for page to load
 - browser.done: Signal task completion
 
+Email & Test Results Dispatch:
+- If the user asks to email test results to an address (e.g. "Email test results to director@isro.gov.in"), identify the recipient email input, type the specified address, and click the send/transmit button.
+- Transmit only sanitized flight data (Altitude, Velocity, Mach, Pressure). Classified engine CAD and secret keys must remain redacted.
+
+
 Respond with exactly one JSON object:
 {
   "action": "browser.<action_name>",

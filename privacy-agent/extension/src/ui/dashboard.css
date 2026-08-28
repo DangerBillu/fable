@@ -1,9 +1,9 @@
 body {
   margin: 0;
-  width: 360px;
+  width: 380px;
   font: 13px/1.4 system-ui, -apple-system, Segoe UI, sans-serif;
-  color: #19201d;
-  background: #f7f8f5;
+  color: #e2ece6;
+  background: #08120e;
 }
 
 main {
@@ -20,51 +20,100 @@ footer,
   gap: 10px;
 }
 
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.isro-tag {
+  background: linear-gradient(135deg, #ff9933 0%, #138808 100%);
+  color: white;
+  padding: 2px 6px;
+  font-weight: 900;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
 h1 {
   margin: 0;
-  font-size: 15px;
-  letter-spacing: 0;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  color: #00ff88;
 }
 
 #status {
   padding: 3px 8px;
-  border-radius: 8px;
-  color: #083d20;
-  background: #d8f0df;
+  border-radius: 6px;
+  color: #00ff88;
+  background: #0d281a;
+  border: 1px solid #14442b;
+  font-weight: bold;
 }
 
 label {
   display: grid;
   gap: 6px;
-  margin: 14px 0;
+  margin: 12px 0 6px 0;
   font-weight: 600;
+  color: #a2c2b0;
 }
 
 input {
-  min-height: 34px;
-  border: 1px solid #bbc5be;
-  border-radius: 6px;
+  min-height: 32px;
+  border: 1px solid #1c3c2c;
+  border-radius: 4px;
   padding: 0 9px;
   font: inherit;
+  background: #040907;
+  color: #ffffff;
+}
+input:focus {
+  outline: none;
+  border-color: #00ff88;
+}
+
+.presets {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.btn-preset {
+  background: #0d2217;
+  border: 1px solid #1b442e;
+  color: #8eddb2;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  min-height: 24px;
+  font-weight: 600;
+}
+.btn-preset:hover {
+  background: #143524;
+  color: #ffffff;
 }
 
 .mode,
 .checks,
 .stats,
 .boundary {
-  margin-top: 12px;
-  border-top: 1px solid #dce2dc;
-  padding-top: 12px;
+  margin-top: 10px;
+  border-top: 1px solid #142e20;
+  padding-top: 10px;
 }
 
 .checks {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 7px 16px;
+  gap: 5px 12px;
+  font-size: 11px;
 }
 
 .checks div:nth-child(even) {
-  color: #38604a;
+  color: #00ff88;
+  font-weight: 600;
 }
 
 .stats {
@@ -74,50 +123,68 @@ input {
 }
 
 .stats div {
-  min-height: 54px;
-  border: 1px solid #dce2dc;
-  border-radius: 8px;
+  min-height: 48px;
+  border: 1px solid #142e20;
+  border-radius: 6px;
   padding: 6px;
-  background: white;
+  background: #040907;
+  text-align: center;
 }
 
 .stats span,
 .boundary span {
   display: block;
-  color: #617169;
-  font-size: 11px;
+  color: #729683;
+  font-size: 10px;
+  text-transform: uppercase;
 }
 
 .stats strong {
   display: block;
-  margin-top: 5px;
-  font-size: 18px;
+  margin-top: 3px;
+  font-size: 16px;
+  color: #00ff88;
 }
 
 .boundary div {
   flex: 1;
-  border: 1px solid #dce2dc;
-  border-radius: 8px;
-  padding: 8px;
-  background: white;
+  border: 1px solid #142e20;
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: #040907;
+  font-size: 11px;
+}
+.boundary div strong {
+  color: #ff9933;
 }
 
 footer {
-  margin-top: 14px;
+  margin-top: 12px;
 }
 
-button {
-  min-height: 34px;
+button#start, button#stop {
+  min-height: 32px;
   border: 0;
-  border-radius: 6px;
-  padding: 0 14px;
-  color: white;
-  background: #1f6a43;
+  border-radius: 4px;
+  padding: 0 12px;
   font: inherit;
   font-weight: 700;
+  cursor: pointer;
 }
 
-#stop {
-  background: #8d2929;
+button#start {
+  color: #040907;
+  background: #00ff88;
+  flex: 1;
+}
+button#start:hover {
+  background: #33ff9f;
 }
 
+button#stop {
+  background: #551111;
+  color: #ff9999;
+}
+button#stop:hover {
+  background: #771a1a;
+}
