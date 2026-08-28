@@ -301,6 +301,17 @@ async function runStep(goal) {
   lastStats.tokenized += Number(privacy.findings || 0);
   lastStats.lastAction = planned.action || planned.command?.action || "none";
 
+  // If a tool (e.g. email sender) was executed by backend server, push clear result to chat UI
+  if (planned.tool_result) {
+    const res = planned.tool_result;
+    const recipient = res.recipient || "recipient";
+    if (res.smtp_sent) {
+      pushChat("bot", `📧 Email Delivered! Successfully sent live email to ${recipient} via SMTP.`);
+    } else {
+      pushChat("bot", `📧 Email Report Generated for ${recipient}. Saved to outbox/latest_flight_report.html`);
+    }
+  }
+
   if (planned.status === "REQUIRE_APPROVAL" || planned.status === "DENY") {
     lastStats.blocked += 1;
     pushChat("bot", "Action blocked by Privacy Shield policy.");

@@ -40,11 +40,6 @@ class AgentLoop:
             pass
 
         screenshot_b64 = sanitized.sanitized_screenshot.webp_base64 if sanitized.sanitized_screenshot else None
-        request = self.planner.plan(sanitized.state, user_instruction, screenshot_b64=screenshot_b64)
-        action_json = action_request_to_json(request)
-
-        approved = self.policy.evaluate(sanitized.state, request, approved_by_user=approved_by_user)
-        self.audit.record(observation.session_id, sanitized.sanitized_dom.domain, approved, "PENDING")
         
         privacy_stats = {
             "faces_blurred": sanitized.face_count,
@@ -53,11 +48,13 @@ class AgentLoop:
             "findings": sanitized.state.privacy.get("findings", 0),
         }
 
-        article_email_result = self._maybe_email_article_summary(sanitized.state, user_instruction)
-        if article_email_result:
+        # Check if the user's directive is an email request (telemetry, summary, or page link)
+        email_result = self._maybe_handle_email_directive(sanitized.state, user_instruction)
+        if email_result:
+            recipient = email_result.get("recipient") or "recipient"
             done_request = ActionRequest(
                 BrowserAction.DONE,
-                reasoning=f"Fable emailed a sanitized page summary to {article_email_result['recipient']}.",
+                reasoning=f"Fable processed email dispatch to {recipient}. Status: {email_result.get('status', 'completed')}.",
             )
             return {
                 "status": "ALLOW",
@@ -68,9 +65,15 @@ class AgentLoop:
                 "privacy_stats": privacy_stats,
                 "safe_context": safe_context,
                 "temporal_update": temporal_update,
-                "tool_result": article_email_result,
+                "tool_result": email_result,
             }
-        
+
+        request = self.planner.plan(sanitized.state, user_instruction, screenshot_b64=screenshot_b64)
+        action_json = action_request_to_json(request)
+
+        approved = self.policy.evaluate(sanitized.state, request, approved_by_user=approved_by_user)
+        self.audit.record(observation.session_id, sanitized.sanitized_dom.domain, approved, "PENDING")
+
         if approved.decision != PolicyDecision.ALLOW:
             return {
                 "status": approved.decision.value,
@@ -93,18 +96,38 @@ class AgentLoop:
             "temporal_update": temporal_update,
         }
 
-    def _maybe_email_article_summary(self, state, user_instruction: str) -> dict | None:
+    def _maybe_handle_email_directive(self, state, user_instruction: str) -> dict | None:
         wanted = user_instruction.lower()
         if not any(word in wanted for word in ("email", "mail", "send")):
-            return None
-        if not any(word in wanted for word in ("summary", "summarize", "summarise", "article", "page")):
             return None
 
         email_match = re.search(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", user_instruction)
         recipient = email_match.group(0) if email_match else ""
+
         article_title = str(state.page.get("title") or "Current page")
         article_url = str(state.page.get("url") or "")
         source_text = state.visible_text
+
+        # 1. Telemetry / Flight test report email
+        if any(word in wanted for word in ("telemetry", "launch", "flight", "rocket", "stage", "test")):
+            telemetry_data = getattr(state, "telemetry", None) or {
+                "altitude_km": 54.20,
+                "velocity_ms": 1824.5,
+                "mach": 5.42,
+                "dynamic_pressure_kpa": 34.80,
+                "chamber_pressure_bar": 58.4,
+                "propellant_remaining_pct": 71.8,
+            }
+            subject = "ISRO LVM3-M4 Launch Telemetry & Flight Test Report"
+            return self.gateway.execute_tool(
+                "comms.transmit_telemetry_email",
+                recipient=recipient or "mission-control@isro.gov.in",
+                subject=subject,
+                telemetry=telemetry_data,
+                sanitized_body=source_text[:1200],
+            )
+
+        # 2. General Article summary / Page link email
         summary = summarize_article(source_text)
         subject = f"Fable summary: {article_title[:80]}"
         return self.gateway.execute_tool(

@@ -1,10 +1,10 @@
-Content-Type: multipart/alternative; boundary="===============7462997362314744725=="
+Content-Type: multipart/alternative; boundary="===============1977623673046818041=="
 MIME-Version: 1.0
 Subject: Test Report
 From: Fable <sender@example.com>
 To: recipient@example.com
 
---===============7462997362314744725==
+--===============1977623673046818041==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -27,7 +27,7 @@ PRIVACY VERIFICATION:
 - Telemetry Crypto Keys      : TOKENIZED / PROTECTED
 ======================================================================
 
---===============7462997362314744725==
+--===============1977623673046818041==
 Content-Type: text/html; charset="utf-8"
 MIME-Version: 1.0
 Content-Transfer-Encoding: base64
@@ -94,4 +94,4 @@ CiAgICA8ZGl2IGNsYXNzPSJmb290ZXIiPgogICAgICBJbmRpYW4gU3BhY2UgUmVzZWFyY2ggT3Jn
 YW5pc2F0aW9uIChJU1JPKSDigKIgQXV0b25vbW91cyBNaXNzaW9uIENvbnRyb2wgQWdlbnQKICAg
 IDwvZGl2PgogIDwvZGl2Pgo8L2JvZHk+CjwvaHRtbD4=
 
---===============7462997362314744725==--
+--===============1977623673046818041==--
