@@ -125,6 +125,20 @@ class FaceDetectorTests(unittest.TestCase):
         self.assertIsInstance(faces, list)
         self.assertEqual(len(faces), 0)
 
+    def test_redactor_skips_oversized_face_regions(self):
+        """Bad detector boxes should not redact the entire screenshot."""
+        from runtime.privacy.redactor import ImageRedactor
+        from PIL import Image
+
+        img = Image.new("RGB", (200, 100), color=(20, 120, 220))
+        face_regions = (
+            FaceRegion(x=0, y=0, width=200, height=100, confidence=0.9, source="browser"),
+        )
+        redactor = ImageRedactor()
+        count = redactor.blur_faces(img, face_regions)
+        self.assertEqual(count, 0)
+        self.assertEqual(img.getpixel((100, 50)), (20, 120, 220))
+
 
 if __name__ == "__main__":
     unittest.main()

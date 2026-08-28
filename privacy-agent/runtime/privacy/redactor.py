@@ -29,6 +29,8 @@ class ImageRedactor:
         image = self._load_data_url(data_url)
         draw = ImageDraw.Draw(image)
         for region in regions:
+            if region.category == SensitiveCategory.FACE or self._is_oversized(region.bbox, image.width, image.height):
+                continue
             x, y, w, h = self._padded_box(region.bbox, image.width, image.height)
             if region.category in HIGH_RISK or region.classification in {ClassificationLevel.RESTRICTED, ClassificationLevel.SECRET}:
                 draw.rectangle((x, y, x + w, y + h), fill=(0, 0, 0))
@@ -42,6 +44,8 @@ class ImageRedactor:
     def blur_faces(self, image: Image.Image, face_regions: tuple[FaceRegion, ...]) -> int:
         count = 0
         for region in face_regions:
+            if self._is_oversized((region.x, region.y, region.width, region.height), image.width, image.height):
+                continue
             x, y, w, h = self._padded_box((region.x, region.y, region.width, region.height), image.width, image.height)
             crop = image.crop((x, y, x + w, y + h)).filter(ImageFilter.GaussianBlur(radius=20))
             image.paste(crop, (x, y))
@@ -53,6 +57,8 @@ class ImageRedactor:
         count = 0
         for finding in findings:
             if not finding.bbox:
+                continue
+            if self._is_oversized(finding.bbox, image.width, image.height):
                 continue
             x, y, w, h = self._padded_box(finding.bbox, image.width, image.height)
             if finding.category == SensitiveCategory.QR_CODE:
@@ -69,6 +75,8 @@ class ImageRedactor:
         total_redactions = 0
         
         for region in text_regions:
+            if region.category == SensitiveCategory.FACE or self._is_oversized(region.bbox, image.width, image.height):
+                continue
             x, y, w, h = self._padded_box(region.bbox, image.width, image.height)
             if region.category in HIGH_RISK or region.classification in {ClassificationLevel.RESTRICTED, ClassificationLevel.SECRET}:
                 draw.rectangle((x, y, x + w, y + h), fill=(0, 0, 0))
@@ -99,3 +107,8 @@ class ImageRedactor:
         bottom = min(height, y + h + self.padding)
         return left, top, max(0, right - left), max(0, bottom - top)
 
+    def _is_oversized(self, bbox: tuple[int, int, int, int], width: int, height: int) -> bool:
+        _x, _y, w, h = bbox
+        if w <= 0 or h <= 0:
+            return True
+        return (w * h) / max(width * height, 1) > 0.45

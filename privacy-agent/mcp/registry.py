@@ -222,11 +222,12 @@ class McpRegistry:
         **kw,
     ) -> dict:
         # Calculate wind shear correlation ratio against Datapoint A (Velocity) & Datapoint B (Altitude)
+        windspeed_m_s = round(windspeed_knots * 0.514444, 2)
         speed_wind_ratio = round(velocity_ms / max(windspeed_knots, 0.1), 2)
-        wind_alt_index = round((windspeed_knots * 0.514444) / max(altitude_km, 0.1), 4)
+        wind_alt_index = round(windspeed_m_s / max(altitude_km, 0.1), 4)
         tally_summary = (
             f"WIND SPEED TALLY ANALYSIS:\n"
-            f"- Current Wind Speed: {windspeed_knots} knots (6.38 m/s)\n"
+            f"- Current Wind Speed: {windspeed_knots} knots ({windspeed_m_s} m/s)\n"
             f"- Datapoint A (Velocity): {velocity_ms} m/s (Mach 5.42)\n"
             f"- Datapoint B (Altitude): {altitude_km} km\n"
             f"- Velocity-to-Wind Ratio: {speed_wind_ratio}x\n"

@@ -1,32 +1,943 @@
 {
   "page": {
-    "title": "Test Page",
-    "domain": "example.com",
-    "url": "https://example.com"
+    "title": "Untitled document - Google Docs",
+    "domain": "docs.google.com",
+    "url": "https://docs.google.com/document/d/14qh0Qw1AKD62X-2-arCLemSg1f5dNXgPL4Yj3_dXWVs/edit?tab=t.ozzkplu53jtt"
   },
   "elements": [
     {
-      "id": "btn_1",
-      "type": "button",
-      "label": "Settings",
+      "id": "iframe_1",
+      "type": "iframe",
+      "label": null,
       "bbox": [
-        10,
-        10,
-        80,
-        30
+        0.0,
+        -1287.0,
+        120.20000457763672,
+        120.20000457763672
       ],
       "enabled": true,
       "href": null
+    },
+    {
+      "id": "iframe_2",
+      "type": "iframe",
+      "label": null,
+      "bbox": [
+        0.0,
+        -1287.0,
+        120.20000457763672,
+        120.20000457763672
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-chrome",
+      "type": "banner",
+      "label": "Menu bar Untitled document Share Upgrade Upgrade for premium features Try Gemini FileEditViewInsertFormatToolsExtensionsHelp Normal text Arial Editing",
+      "bbox": [
+        0.0,
+        0.0,
+        1536.0,
+        113.80000305175781
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-branding-logo-link",
+      "type": "a",
+      "label": "Docs home",
+      "bbox": [
+        8.0,
+        7.0,
+        48.0,
+        48.0
+      ],
+      "enabled": true,
+      "href": "https://docs.google.com/document/u/0/?authuser=0&usp=docs_web"
+    },
+    {
+      "id": "rename_5",
+      "type": "input",
+      "label": "Rename",
+      "bbox": [
+        54.0,
+        10.0,
+        169.60000610351562,
+        23.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-star",
+      "type": "checkbox",
+      "label": "Star",
+      "bbox": [
+        225.60000610351562,
+        9.5,
+        28.0,
+        28.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-folder",
+      "type": "button",
+      "label": "Move",
+      "bbox": [
+        257.6000061035156,
+        9.5,
+        28.0,
+        28.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-save-indicator-badge",
+      "type": "button",
+      "label": "Document status: Saved to Drive.",
+      "bbox": [
+        289.6000061035156,
+        9.5,
+        28.0,
+        28.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-revisions-appbarbutton",
+      "type": "button",
+      "label": "Last edit was 27 minutes ago",
+      "bbox": [
+        1009.7250366210938,
+        9.199999809265137,
+        41.60000228881836,
+        41.60000228881836
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-docos-commentsbutton",
+      "type": "button",
+      "label": "Show all comments 0 new comments 0",
+      "bbox": [
+        1059.3250732421875,
+        9.199999809265137,
+        41.60000228881836,
+        41.60000228881836
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-meet-in-editors-entrypointbutton",
+      "type": "button",
+      "label": "Join a call here or present this tab to the call",
+      "bbox": [
+        1108.925048828125,
+        10.0,
+        68.0,
+        40.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "share_private_to_only_me_share_9",
+      "type": "button",
+      "label": "Share. Private only to me.  Share",
+      "bbox": [
+        1184.925048828125,
+        10.0,
+        91.07500457763672,
+        40.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "scb-quick-actions-menu-button",
+      "type": "button",
+      "label": "Quick sharing actions",
+      "bbox": [
+        1275.0,
+        10.0,
+        34.0,
+        40.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "upgrade_upgrade_11",
+      "type": "link",
+      "label": "Upgrade Upgrade",
+      "bbox": [
+        1317.0,
+        10.0,
+        108.0,
+        40.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "try_gemini_15",
+      "type": "button",
+      "label": "Try Gemini",
+      "bbox": [
+        1432.0,
+        10.0,
+        40.0,
+        40.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "google_account_arnav_goyal_lm10arnav_gmail_com_13",
+      "type": "button",
+      "label": "Google Account: Arnav Goyal  \n(EMAIL_001)",
+      "bbox": [
+        1480.0,
+        10.0,
+        40.0,
+        40.0
+      ],
+      "enabled": true,
+      "href": "https://accounts.google.com/SignOutOptions?hl=en-GB&continue=https://docs.google.com/document/u/0/d/14qh0Qw1AKD62X-2-arCLemSg1f5dNXgPL4Yj3_dXWVs/edit%3Fusp%3Ddocs_home&service=writely&ec=GBRAGQ"
+    },
+    {
+      "id": "docs-menubar",
+      "type": "menubar",
+      "label": "FileEditViewInsertFormatToolsExtensionsHelp",
+      "bbox": [
+        54.0,
+        26.0,
+        421.45001220703125,
+        33.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-file-menu",
+      "type": "menuitem",
+      "label": "File",
+      "bbox": [
+        54.0,
+        34.0,
+        38.25,
+        23.200000762939453
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-edit-menu",
+      "type": "menuitem",
+      "label": "Edit",
+      "bbox": [
+        92.25,
+        34.0,
+        40.85000228881836,
+        23.200000762939453
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-view-menu",
+      "type": "menuitem",
+      "label": "View",
+      "bbox": [
+        133.10000610351562,
+        34.0,
+        46.01250076293945,
+        23.200000762939453
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-insert-menu",
+      "type": "menuitem",
+      "label": "Insert",
+      "bbox": [
+        179.1125030517578,
+        34.0,
+        53.462501525878906,
+        23.200000762939453
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-format-menu",
+      "type": "menuitem",
+      "label": "Format",
+      "bbox": [
+        232.5749969482422,
+        34.0,
+        61.85000228881836,
+        23.200000762939453
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-tools-menu",
+      "type": "menuitem",
+      "label": "Tools",
+      "bbox": [
+        294.4250183105469,
+        34.0,
+        49.8125,
+        23.200000762939453
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-extensions-menu",
+      "type": "menuitem",
+      "label": "Extensions",
+      "bbox": [
+        344.2375183105469,
+        34.0,
+        85.7249984741211,
+        23.200000762939453
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-help-menu",
+      "type": "menuitem",
+      "label": "Help",
+      "bbox": [
+        429.9624938964844,
+        34.0,
+        45.48749923706055,
+        23.200000762939453
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-omnibox-toolbar",
+      "type": "toolbar",
+      "label": "Search the menus (Alt+/)",
+      "bbox": [
+        24.0,
+        65.80000305175781,
+        35.0,
+        38.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "menus_24",
+      "type": "combobox",
+      "label": "Menus Menus",
+      "bbox": [
+        25.0,
+        70.80000305175781,
+        43.60000228881836,
+        28.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-toolbar",
+      "type": "toolbar",
+      "label": "Main Normal text Arial",
+      "bbox": [
+        59.0,
+        75.3125,
+        1146.5999755859375,
+        16.80000114440918
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "undoButton",
+      "type": "button",
+      "label": "Undo (Ctrl+Z)",
+      "bbox": [
+        62.0,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "redoButton",
+      "type": "button",
+      "label": "Redo (Ctrl+Y)",
+      "bbox": [
+        93.5999984741211,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "printButton",
+      "type": "button",
+      "label": "Print (Ctrl+P)",
+      "bbox": [
+        125.20000457763672,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "spellGrammarCheckButton",
+      "type": "button",
+      "label": "Spelling and grammar check (Ctrl+Alt+X)",
+      "bbox": [
+        156.8000030517578,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "formatPainterButton",
+      "type": "button",
+      "label": "Paint format",
+      "bbox": [
+        188.40000915527344,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "zoom_31",
+      "type": "input",
+      "label": "Zoom",
+      "bbox": [
+        222.8000030517578,
+        71.80000305175781,
+        48.0,
+        28.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "fontSizeDecrement",
+      "type": "button",
+      "label": "Decrease font size (Ctrl+Shift+comma)",
+      "bbox": [
+        539.2000122070312,
+        72.80000305175781,
+        24.0,
+        24.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "font_size_33",
+      "type": "input",
+      "label": "Font size",
+      "bbox": [
+        567.0,
+        72.80000305175781,
+        32.0,
+        24.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "fontSizeIncrement",
+      "type": "button",
+      "label": "Increase font size (Ctrl+Shift+full stop)",
+      "bbox": [
+        602.7999877929688,
+        72.80000305175781,
+        24.0,
+        24.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "boldButton",
+      "type": "button",
+      "label": "Bold (Ctrl+B)",
+      "bbox": [
+        635.6000366210938,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "italicButton",
+      "type": "button",
+      "label": "Italic (Ctrl+I)",
+      "bbox": [
+        667.2000122070312,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "underlineButton",
+      "type": "button",
+      "label": "Underline (Ctrl+U)",
+      "bbox": [
+        698.7999877929688,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "textColorButton",
+      "type": "button",
+      "label": "Text colour",
+      "bbox": [
+        730.4000244140625,
+        70.0,
+        31.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "bgColorButton",
+      "type": "button",
+      "label": "Highlight colour",
+      "bbox": [
+        764.0,
+        70.0,
+        31.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "insertLinkButton",
+      "type": "button",
+      "label": "Insert link (Ctrl+K)",
+      "bbox": [
+        804.4000244140625,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "insertCommentButton",
+      "type": "button",
+      "label": "Add comment (Ctrl+Alt+M)",
+      "bbox": [
+        836.0,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "insertImageButton",
+      "type": "button",
+      "label": "Insert image",
+      "bbox": [
+        867.6000366210938,
+        70.0,
+        31.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "alignButton",
+      "type": "button",
+      "label": "Align and indent",
+      "bbox": [
+        908.0,
+        70.0,
+        38.60000228881836,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "lineSpacingMenuButton",
+      "type": "button",
+      "label": "Line & paragraph spacing",
+      "bbox": [
+        948.6000366210938,
+        70.0,
+        31.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "addChecklistButton",
+      "type": "button",
+      "label": "Checklist (Ctrl+Shift+9)",
+      "bbox": [
+        982.2000122070312,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "checklistPresetMenuButton",
+      "type": "button",
+      "label": "Checklist menu",
+      "bbox": [
+        1011.7999877929688,
+        70.0,
+        11.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "addBulletButton",
+      "type": "button",
+      "label": "Bulleted list (Ctrl+Shift+8)",
+      "bbox": [
+        1025.4000244140625,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "bulletedListPresetMenuButton",
+      "type": "button",
+      "label": "Bulleted list menu",
+      "bbox": [
+        1055.0,
+        70.0,
+        11.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "addNumberedBulletButton",
+      "type": "button",
+      "label": "Numbered list (Ctrl+Shift+7)",
+      "bbox": [
+        1068.5999755859375,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "numberedListPresetMenuButton",
+      "type": "button",
+      "label": "Numbered list menu",
+      "bbox": [
+        1098.2000732421875,
+        70.0,
+        11.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "outdentButton",
+      "type": "button",
+      "label": "Decrease indent (Ctrl+opening square bracket)",
+      "bbox": [
+        1111.800048828125,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "indentButton",
+      "type": "button",
+      "label": "Increase indent (Ctrl+closing square bracket)",
+      "bbox": [
+        1143.4000244140625,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "clearFormattingButton",
+      "type": "button",
+      "label": "Clear formatting (Ctrl+backslash)",
+      "bbox": [
+        1175.0,
+        70.0,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-side-toolbar",
+      "type": "toolbar",
+      "label": "Mode and view Editing",
+      "bbox": [
+        1342.0,
+        65.0,
+        110.0,
+        40.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-toolbar-mode-switcher",
+      "type": "button",
+      "label": "Editing mode Editing",
+      "bbox": [
+        1343.0,
+        70.20000457763672,
+        64.5999984741211,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "viewModeButton",
+      "type": "button",
+      "label": "Hide the menus (Ctrl+Shift+F)",
+      "bbox": [
+        1421.4000244140625,
+        70.20000457763672,
+        29.600000381469727,
+        29.600000381469727
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "div_57",
+      "type": "tablist",
+      "label": null,
+      "bbox": [
+        1480.0,
+        59.0,
+        56.0,
+        614.6000366210938
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "hide_side_panel_58",
+      "type": "button",
+      "label": "Hide side panel",
+      "bbox": [
+        1480.0,
+        673.6000366210938,
+        56.0,
+        56.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "div_62",
+      "type": "button",
+      "label": null,
+      "bbox": [
+        696.2000122070312,
+        689.6000366210938,
+        49.60000228881836,
+        40.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "document_tabs_document_tabs_tab_1_headings_that__60",
+      "type": "div",
+      "label": "Document tabs Document tabs Tab 1 Tab 2",
+      "bbox": [
+        16.0,
+        128.8000030517578,
+        280.0,
+        603.4000244140625
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "hide_tabs_and_outlines_61",
+      "type": "button",
+      "label": "Hide tabs and outlines",
+      "bbox": [
+        16.0,
+        136.8000030517578,
+        60.0,
+        40.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "div_62",
+      "type": "button",
+      "label": null,
+      "bbox": [
+        29.0,
+        136.8000030517578,
+        40.0,
+        40.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "back_63",
+      "type": "button",
+      "label": "Back",
+      "bbox": [
+        37.0,
+        144.8000030517578,
+        21.0,
+        21.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "add_tab_64",
+      "type": "button",
+      "label": "Add tab",
+      "bbox": [
+        239.0,
+        194.8000030517578,
+        28.0,
+        28.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "tab_1_tab_1_65",
+      "type": "treeitem",
+      "label": "Tab 1 Tab 1",
+      "bbox": [
+        32.0,
+        234.8000030517578,
+        248.0,
+        40.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "tab_2_tab_2_69",
+      "type": "treeitem",
+      "label": "Tab 2 Tab 2",
+      "bbox": [
+        32.0,
+        274.8000183105469,
+        248.0,
+        40.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "tab_options_70",
+      "type": "button",
+      "label": "Tab options",
+      "bbox": [
+        244.0,
+        285.8000183105469,
+        18.0,
+        18.0
+      ],
+      "enabled": true,
+      "href": null
+    },
+    {
+      "id": "docs-a11y-aria-enable",
+      "type": "a",
+      "label": "Turn on screen reader support",
+      "bbox": [
+        0.0,
+        -1.0,
+        1.0,
+        1.0
+      ],
+      "enabled": true,
+      "href": "https://docs.google.com/document/d/14qh0Qw1AKD62X-2-arCLemSg1f5dNXgPL4Yj3_dXWVs/edit?tab=t.ozzkplu53jtt#"
     }
   ],
-  "visible_text": "Contact: EMAIL_001",
+  "visible_text": "Untitled document Share Upgrade Upgrade for premium features Try Gemini FileEditViewInsertFormatToolsExtensionsHelp Normal text Arial Editing PHONE_001 Document tabs Tab 1 Tab 2 Turn on screen reader support To enable screen reader support, press Ctrl+Alt+Z To learn about keyboard shortcuts, press Ctrl+slash Banner hidden",
   "privacy": {
     "mode": "STRICT",
-    "findings": 1,
-    "sensitive_regions": 0,
-    "redacted": 0,
+    "findings": 2,
+    "sensitive_regions": 2,
+    "redacted": 2,
     "categories": [
-      "EMAIL"
+      "EMAIL",
+      "PHONE"
     ],
     "raw_data_local_only": true,
     "face_count": 0,

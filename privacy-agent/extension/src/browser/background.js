@@ -79,7 +79,35 @@ async function directAction(goal) {
   let command = null;
   let explanation = "";
 
-  // 1. --- EMAIL LINK / SUMMARY / SHARE INTENT ---
+  // 1. --- COORDINATED MCP / TELEMETRY INTENT ---
+  if (isCoordinatedMcpIntent(lowerGoal)) {
+    pushChat("action", "Routing directive through runtime MCP tools with current page telemetry.");
+    try {
+      const planned = await callRuntimeStep(dom, goal, true);
+      if (planned?.tool_result) {
+        lastStats.approved += 1;
+        const summary = planned.tool_result.summary || planned.tool_result.status || "MCP workflow completed.";
+        const emailStatus = planned.tool_result.email_dispatch?.status || planned.tool_result.status || "completed";
+        pushChat("bot", `${summary}\nEmail status: ${emailStatus}`);
+        return { ok: true, action: "mcp", detail: emailStatus };
+      }
+      if (planned?.command && planned.command.action !== "done") {
+        pushChat("action", `Executing MCP browser command: ${planned.command.action}`);
+        const execution = await sendTab(tab.id, { type: "EXECUTE_APPROVED_COMMAND", command: planned.command });
+        if (!execution.ok) {
+          throw new Error(execution.error || "Command execution failed");
+        }
+        lastStats.approved += 1;
+        lastStats.lastAction = planned.command.action;
+        pushChat("bot", "MCP action completed.");
+        return { ok: true, action: planned.command.action, detail: "MCP browser command completed" };
+      }
+    } catch (err) {
+      pushChat("action", "Runtime MCP unavailable, continuing with direct browser parsing.");
+    }
+  }
+
+  // 2. --- EMAIL LINK / SUMMARY / SHARE INTENT ---
   if (/email|mail|send\s*(me\s*)?(the\s*)?(link|url|website|summary)|share\s*(the\s*)?(link|url)/i.test(lowerGoal)) {
     const emailMatch = goal.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
     const recipient = emailMatch ? emailMatch[0] : "user@example.com";
@@ -92,15 +120,7 @@ async function directAction(goal) {
       const res = await fetch(RUNTIME_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session_id: sessionId,
-          user_instruction: `Email the link ${pageUrl} (${pageTitle}) to ${recipient}`,
-          title: dom.title,
-          url: dom.url,
-          visible_text: dom.visible_text,
-          elements: dom.elements,
-          approved_by_user: true
-        })
+        body: JSON.stringify(runtimePayload(dom, `Email the link ${pageUrl} (${pageTitle}) to ${recipient}`, true))
       });
 
       if (res.ok) {
@@ -116,18 +136,18 @@ async function directAction(goal) {
     return { ok: true, action: "email", detail: `Captured link ${pageUrl}` };
   }
 
-  // 2. --- SCROLL INTENT ---
+  // 3. --- SCROLL INTENT ---
   if (/scroll\s*(down|up|bottom|top)/i.test(lowerGoal)) {
     const direction = /up|top/i.test(lowerGoal) ? -500 : 500;
     command = { action: "scroll", deltaY: direction };
     explanation = direction > 0 ? "Scrolling page down" : "Scrolling page up";
   }
-  // 3. --- GO BACK INTENT ---
+  // 4. --- GO BACK INTENT ---
   else if (/go\s*back|navigate\s*back|previous\s*page/i.test(lowerGoal)) {
     command = { action: "go_back" };
     explanation = "Navigating back to previous page";
   }
-  // 4. --- NAVIGATE INTENT ---
+  // 5. --- NAVIGATE INTENT ---
   else if (/navigate\s*to\s+|open\s+(url|page|site)\s+|go\s*to\s+/i.test(lowerGoal)) {
     const urlMatch = lowerGoal.match(/(?:navigate\s*to|open\s*(?:url|page|site)|go\s*to)\s+(\S+)/i);
     if (urlMatch) {
@@ -138,18 +158,19 @@ async function directAction(goal) {
     }
   }
 
-  // 5. --- CLICK / TYPE INTENT ---
+  // 6. --- CLICK / TYPE INTENT ---
   // Only attempt to find and click an element if user explicitly requested clicking/typing, OR if no other intent matched.
   if (!command && isExplicitClickOrTypeIntent(lowerGoal)) {
-    const match = findBestElement(dom.elements, lowerGoal);
+    const typeIntent = parseTypeIntent(goal);
+    const matchGoal = typeIntent?.target || lowerGoal;
+    const match = findBestElement(dom.elements, matchGoal, typeIntent ? "type" : "click");
     if (match) {
-      const typeMatch = goal.match(/type\s+["'](.+?)["']\s+(?:in|into)/i) || goal.match(/(?:type|enter|write|fill|input)\s+["']?(.+?)["']?\s*$/i);
-      if (/type|enter|write|fill|input/i.test(lowerGoal) && typeMatch) {
-        command = { action: "type", element_id: match.id, text: typeMatch[1] };
-        explanation = `Typing "${typeMatch[1]}" into [${match.text || match.id}]`;
+      if (typeIntent) {
+        command = { action: "type", element_id: match.id, text: typeIntent.text };
+        explanation = `Typing "${typeIntent.text}" into [${match.text || match.aria_label || match.placeholder || match.id}]`;
       } else {
         command = { action: "click", element_id: match.id };
-        explanation = `Clicking element [${match.text || match.id}]`;
+        explanation = `Clicking element [${match.text || match.aria_label || match.id}]`;
       }
     }
   }
@@ -168,20 +189,39 @@ async function directAction(goal) {
     pushChat("bot", "Done! " + explanation);
   } else {
     pushChat("bot", "Action failed: " + (result.error || "unknown error"));
+    return { ok: false, error: result.error || "unknown error" };
   }
 
   return { ok: true, action: command.action, detail: explanation };
+}
+
+function isCoordinatedMcpIntent(goal) {
+  return /mcp|coordinate|coordinated|tally|datapoint|datapoints|windspeed|wind\s*speed|current\s*wind|telemetry.+email|email.+telemetry/i.test(goal);
 }
 
 function isExplicitClickOrTypeIntent(goal) {
   return /click|press|tap|hit|push|trigger|recalibrate|jettison|separate|select|type|enter|write|fill|input/i.test(goal);
 }
 
-function findBestElement(elements, goal) {
+function parseTypeIntent(goal) {
+  const patterns = [
+    /\b(?:type|enter|write|fill|input)\s+["']([^"']+)["']\s+(?:in|into|on|to)\s+(.+)$/i,
+    /\b(?:type|enter|write|fill|input)\s+(.+?)\s+(?:in|into|on|to)\s+(.+)$/i,
+  ];
+  for (const pattern of patterns) {
+    const match = goal.match(pattern);
+    if (match?.[1]) {
+      return { text: match[1].trim(), target: (match[2] || "").trim().toLowerCase() };
+    }
+  }
+  return null;
+}
+
+function findBestElement(elements, goal, mode = "click") {
   if (!elements || elements.length === 0) return null;
 
   const cleaned = goal
-    .replace(/click(\s+on)?|press|tap|hit|push|trigger|activate|the|a|an|button|link|please|fable/gi, "")
+    .replace(/click(\s+on)?|press|tap|hit|push|trigger|activate|select|type|enter|write|fill|input|into|in|the|a|an|button|link|field|please|fable/gi, "")
     .trim();
 
   let bestScore = 0;
@@ -192,19 +232,28 @@ function findBestElement(elements, goal) {
     const elText = (el.text || "").toLowerCase();
     const elId = (el.id || "").toLowerCase();
     const elLabel = (el.aria_label || "").toLowerCase();
+    const elPlaceholder = (el.placeholder || "").toLowerCase();
     const elRole = (el.role || "").toLowerCase();
-    const combined = `${elText} ${elId} ${elLabel}`;
+    const elType = (el.input_type || el.type || "").toLowerCase();
+    const combined = `${elText} ${elId} ${elLabel} ${elPlaceholder}`;
 
     if (goal.includes(elId) && elId.length > 2) score += 100;
     if (elText && goal.includes(elText)) score += 80;
+    if (elLabel && goal.includes(elLabel)) score += 80;
+    if (elPlaceholder && goal.includes(elPlaceholder)) score += 60;
 
     const goalWords = cleaned.split(/\s+/).filter(w => w.length > 2);
     for (const word of goalWords) {
       if (combined.includes(word)) score += 20;
     }
 
-    if (el.tag === "button" || elRole === "button") score += 5;
-    if (el.tag === "a") score += 3;
+    if (mode === "type") {
+      if (["input", "textarea", "select"].includes(el.tag) || ["textbox", "combobox"].includes(elRole)) score += 35;
+      if (["text", "email", "search", "url", "tel"].includes(elType)) score += 10;
+    } else {
+      if (el.tag === "button" || elRole === "button") score += 10;
+      if (el.tag === "a") score += 5;
+    }
     if (el.enabled) score += 2;
 
     if (score > bestScore) {
@@ -214,6 +263,30 @@ function findBestElement(elements, goal) {
   }
 
   return bestScore >= 15 ? bestElement : null;
+}
+
+function runtimePayload(dom, instruction, approvedByUser) {
+  return {
+    session_id: sessionId,
+    user_instruction: instruction,
+    title: dom.title,
+    url: dom.url,
+    visible_text: dom.visible_text,
+    elements: dom.elements,
+    approved_by_user: approvedByUser
+  };
+}
+
+async function callRuntimeStep(dom, instruction, approvedByUser = false) {
+  const res = await fetch(RUNTIME_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(runtimePayload(dom, instruction, approvedByUser))
+  });
+  if (!res.ok) {
+    throw new Error(`Runtime rejected step: ${res.status}`);
+  }
+  return await res.json();
 }
 
 async function start(goal) {

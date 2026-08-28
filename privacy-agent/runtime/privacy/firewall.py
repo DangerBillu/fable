@@ -73,7 +73,7 @@ class PrivacyFirewall:
                 for face in merged_face_regions:
                     regions.append(SensitiveRegion(
                         category=SensitiveCategory.FACE,
-                        classification=ClassificationLevel.RESTRICTED,
+                        classification=ClassificationLevel.CONFIDENTIAL,
                         bbox=(face.x, face.y, face.width, face.height),
                         confidence=face.confidence,
                         source="vision",

@@ -110,11 +110,12 @@ class AgentLoop:
 
         # 1. Windspeed Tally & Data Points Calculation
         if any(word in wanted for word in ("windspeed", "wind", "tally", "datapoint", "datapoints")):
+            telemetry_data = getattr(state, "telemetry", None) or {}
             return self.gateway.execute_tool(
                 "telemetry.calculate_wind_tally",
-                windspeed_knots=12.4,
-                velocity_ms=1824.5,
-                altitude_km=54.20,
+                windspeed_knots=self._telemetry_value(telemetry_data, "wind_knots", default=self._mps_to_knots(self._telemetry_value(telemetry_data, "wind_m_s", default=12.4 * 0.514444))),
+                velocity_ms=self._telemetry_value(telemetry_data, "velocity_ms", default=self._telemetry_value(telemetry_data, "velocity_km_s", default=1.8245) * 1000),
+                altitude_km=self._telemetry_value(telemetry_data, "altitude_km", default=54.20),
                 recipient=recipient or "mission-control@isro.gov.in",
             )
 
@@ -149,3 +150,15 @@ class AgentLoop:
             summary=summary,
             source_excerpt=source_text[:1200],
         )
+
+    def _telemetry_value(self, telemetry: dict, key: str, default: float) -> float:
+        value = telemetry.get(key)
+        if isinstance(value, dict):
+            value = value.get("value")
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return float(default)
+
+    def _mps_to_knots(self, value: float) -> float:
+        return float(value) / 0.514444

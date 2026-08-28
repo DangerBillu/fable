@@ -103,9 +103,9 @@
   async function executeCommand(command) {
     switch (command?.action) {
       case "click":
-        return click(command.element_id);
+        return await click(command.element_id);
       case "type":
-        return typeInto(command.element_id, command.text || "");
+        return await typeInto(command.element_id, command.text || "");
       case "scroll":
         window.scrollBy({ left: command.deltaX || 0, top: command.deltaY || 500, behavior: "smooth" });
         return { action: "scroll" };
@@ -123,52 +123,61 @@
     }
   }
 
-  function click(elementId) {
+  async function click(elementId) {
     const target = findElement(elementId);
     if (!target) {
       throw new Error(`Element not found: ${elementId}`);
     }
-    
-    // Smooth scroll into view
-    target.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
 
-    // Visual pulse effect
+    target.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
+    await waitForFrame();
+
     target.classList.remove("fable-agent-active-target");
-    void target.offsetWidth; // trigger reflow
+    void target.offsetWidth;
     target.classList.add("fable-agent-active-target");
 
-    setTimeout(() => {
-      target.focus?.({ preventScroll: true });
-      
-      // Dispatch full mouse click event sequence
-      target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }));
-      target.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }));
-      target.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
-      
-      // Call native click() if button/link/input
-      if (typeof target.click === "function") {
-        target.click();
-      }
-    }, 200);
+    const clickTarget = elementAtCenter(target) || target;
+    clickTarget.focus?.({ preventScroll: true });
 
-    return { action: "click", element_id: elementId, tag: target.tagName.toLowerCase() };
+    const rect = clickTarget.getBoundingClientRect();
+    const clientX = Math.round(rect.left + rect.width / 2);
+    const clientY = Math.round(rect.top + rect.height / 2);
+    const eventInit = { bubbles: true, cancelable: true, composed: true, view: window, clientX, clientY };
+
+    dispatchPointerEvent(clickTarget, "pointerdown", eventInit);
+    clickTarget.dispatchEvent(new MouseEvent("mousedown", eventInit));
+    dispatchPointerEvent(clickTarget, "pointerup", eventInit);
+    clickTarget.dispatchEvent(new MouseEvent("mouseup", eventInit));
+
+    if (typeof clickTarget.click === "function") {
+      clickTarget.click();
+    } else {
+      clickTarget.dispatchEvent(new MouseEvent("click", eventInit));
+    }
+
+    return { action: "click", element_id: elementId, tag: clickTarget.tagName.toLowerCase() };
   }
 
-  function typeInto(elementId, text) {
+  async function typeInto(elementId, text) {
     const target = findElement(elementId);
     if (!target) {
       throw new Error(`Element not found: ${elementId}`);
     }
-    target.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+    target.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
+    await waitForFrame();
+
     target.classList.add("fable-agent-active-target");
-    target.focus();
+    target.focus?.({ preventScroll: true });
 
     if (target.isContentEditable) {
+      const selection = window.getSelection();
+      selection?.selectAllChildren(target);
       document.execCommand("insertText", false, text);
+      target.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true, inputType: "insertText", data: text }));
     } else {
-      target.value = text;
-      target.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text }));
-      target.dispatchEvent(new Event("change", { bubbles: true }));
+      setNativeValue(target, text);
+      target.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true, inputType: "insertText", data: text }));
+      target.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
     }
     return { action: "type", element_id: elementId, characters: text.length };
   }
@@ -194,8 +203,8 @@
     el = document.querySelector(`[name="${CSS.escape(elementId)}"]`);
     if (el) return el;
 
-    // 5. Fuzzy match on text / aria-label for buttons
-    const buttons = Array.from(document.querySelectorAll("button, [role='button'], a, input[type='button'], input[type='submit']"));
+    // 5. Fuzzy match on text / aria-label for interactive elements.
+    const buttons = Array.from(document.querySelectorAll(INTERACTIVE_SELECTOR));
     const wanted = elementId.toLowerCase().replace(/[^a-z0-9]/g, "");
     for (const btn of buttons) {
       const text = (btn.textContent || btn.value || btn.getAttribute("aria-label") || "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -205,6 +214,41 @@
     }
 
     return null;
+  }
+
+  function elementAtCenter(element) {
+    const rect = element.getBoundingClientRect();
+    const x = Math.max(0, Math.min(window.innerWidth - 1, rect.left + rect.width / 2));
+    const y = Math.max(0, Math.min(window.innerHeight - 1, rect.top + rect.height / 2));
+    const interactive = document.elementFromPoint(x, y)?.closest(INTERACTIVE_SELECTOR);
+    if (interactive && (interactive === element || element.contains(interactive) || interactive.contains(element))) {
+      return interactive;
+    }
+    return element;
+  }
+
+  function dispatchPointerEvent(element, type, eventInit) {
+    if (typeof PointerEvent === "function") {
+      element.dispatchEvent(new PointerEvent(type, { ...eventInit, pointerId: 1, pointerType: "mouse", isPrimary: true }));
+    }
+  }
+
+  function setNativeValue(element, value) {
+    const prototype = element instanceof HTMLTextAreaElement
+      ? HTMLTextAreaElement.prototype
+      : element instanceof HTMLSelectElement
+        ? HTMLSelectElement.prototype
+        : HTMLInputElement.prototype;
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
+    if (descriptor?.set) {
+      descriptor.set.call(element, value);
+    } else {
+      element.value = value;
+    }
+  }
+
+  function waitForFrame() {
+    return new Promise((resolve) => requestAnimationFrame(() => resolve()));
   }
 
   function stableId(element, index) {

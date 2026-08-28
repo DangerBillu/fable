@@ -86,9 +86,9 @@
     showActionBanner(`Processing: "${promptText.slice(0, 32)}..."`);
 
     try {
-      // Send directive to background service worker
+      const messageType = shouldUseDirectAction(promptText) ? "DIRECT_ACTION" : "START_AGENT";
       const response = await chrome.runtime.sendMessage({
-        type: "START_AGENT",
+        type: messageType,
         goal: promptText
       });
 
@@ -119,6 +119,10 @@
         setExecutingState(false);
       }
     }
+  }
+
+  function shouldUseDirectAction(text) {
+    return /\b(click|press|tap|hit|push|trigger|activate|select|type|enter|write|fill|input|scroll|go back|navigate back|windspeed|wind speed|tally|datapoint|datapoints|mcp)\b/i.test(text);
   }
 
   function appendUserMessage(text) {

@@ -53,13 +53,16 @@ class FaceDetector {
         if (pred.probability[0] >= this.threshold) {
           const start = pred.topLeft;
           const end = pred.bottomRight;
-          faces.push({
+          const face = {
             x: start[0],
             y: start[1],
             width: end[0] - start[0],
             height: end[1] - start[1],
             confidence: pred.probability[0]
-          });
+          };
+          if (!this.isOversized(face, bitmap.width, bitmap.height)) {
+            faces.push(face);
+          }
         }
       }
       return faces;
@@ -88,7 +91,7 @@ class FaceDetector {
         const w = Math.min(canvas.width - x, Math.ceil(face.width));
         const h = Math.min(canvas.height - y, Math.ceil(face.height));
 
-        if (w <= 0 || h <= 0) continue;
+        if (w <= 0 || h <= 0 || this.isOversized({ x, y, width: w, height: h }, canvas.width, canvas.height)) continue;
 
         const imageData = ctx.getImageData(x, y, w, h);
         const data = imageData.data;
@@ -134,6 +137,11 @@ class FaceDetector {
       console.warn("Face blurring error:", e);
       return imageDataUrl;
     }
+  }
+
+  isOversized(region, width, height) {
+    if (!region || region.width <= 0 || region.height <= 0) return true;
+    return (region.width * region.height) / Math.max(width * height, 1) > 0.45;
   }
 }
 

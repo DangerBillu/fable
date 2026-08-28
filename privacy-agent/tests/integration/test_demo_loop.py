@@ -1,6 +1,7 @@
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -123,6 +124,41 @@ class DemoLoopTests(unittest.TestCase):
         # Raw Aadhaar and PAN should be tokenized, not present in sanitized state
         self.assertNotIn("1234 5678 9012", state_str)
         self.assertNotIn("ABCDE1234F", state_str)
+
+    def test_wind_tally_uses_screen_telemetry(self):
+        loop = self._make_loop()
+        with patch("runtime.comms.email_sender.EmailSender.send_telemetry_email") as send:
+            send.return_value = {
+                "recipient": "flight.director@example.com",
+                "subject": "FABLE Windspeed & Flight Telemetry Tally Analysis Report",
+                "smtp_configured": False,
+                "smtp_sent": False,
+                "status": "saved_to_outbox",
+            }
+            result = loop.step(
+                RawObservation(
+                    session_id="demo-wind",
+                    raw_dom=RawDom(
+                        title="Launch Telemetry",
+                        url="https://example.com",
+                        visible_text=(
+                            "Cross-Wind Shear 14.8 KNOTS. "
+                            "Datapoint A Velocity 1,900.5 meters/sec. "
+                            "Datapoint B Altitude 62.7 km."
+                        ),
+                        elements=(),
+                    ),
+                ),
+                "Get the current windspeed and tally it with datapoints A and B on the screen and send the response to flight.director@example.com email.",
+                approved_by_user=True,
+            )
+
+        self.assertEqual(result["status"], "ALLOW")
+        self.assertEqual(result["command"]["action"], "done")
+        metrics = result["tool_result"]["tally_metrics"]
+        self.assertEqual(metrics["windspeed_knots"], 14.8)
+        self.assertEqual(metrics["velocity_ms"], 1900.5)
+        self.assertEqual(metrics["altitude_km"], 62.7)
 
 
 if __name__ == "__main__":
