@@ -154,7 +154,7 @@ class McpRegistry:
             "recipient": resolved_recipient,
             "subject": subject or "LVM3-M4 Launch Telemetry & Max-Q Stage Report",
             "dispatch": dispatch_result,
-            "status": dispatch_result.get("status", "saved_to_outbox"),
+            "status": "delivered_to_smtp" if dispatch_result.get("smtp_sent") else "saved_to_outbox",
         }
 
     def _handle_article_summary_email(

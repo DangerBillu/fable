@@ -154,6 +154,15 @@ class EmailSender:
         else:
             smtp_error_code = "smtp_not_configured"
 
+        # Auto-open HTML email in default browser if SMTP failed or outbox mode active
+        auto_open = os.getenv("AUTO_OPEN_OUTBOX", "1") == "1"
+        if not smtp_sent and auto_open and html_file.exists():
+            try:
+                import webbrowser
+                webbrowser.open(html_file.as_uri())
+            except Exception:
+                pass
+
         return {
             "recipient": recipient,
             "subject": subject,
@@ -163,6 +172,7 @@ class EmailSender:
             "smtp_error": smtp_error,
             "outbox_html": str(html_file),
             "outbox_eml": str(eml_file),
+            "auto_opened_in_browser": not smtp_sent and auto_open,
             "status": "delivered_to_smtp" if smtp_sent else "saved_to_outbox",
         }
 
