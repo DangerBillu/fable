@@ -3,7 +3,6 @@
 
   const chatMessages = document.getElementById("chat-messages");
   const chatInput = document.getElementById("chat-input");
-  const chatForm = document.getElementById("chat-form");
   const btnSend = document.getElementById("btn-send");
   const btnStop = document.getElementById("btn-stop");
   const btnClearChat = document.getElementById("btn-clear-chat");
@@ -16,26 +15,34 @@
   const statApproved = document.getElementById("stat-approved");
 
   let isExecuting = false;
+  let lastSeenTs = 0;
 
-  // Auto-resize textarea on input & submit on Enter (without Shift)
+  // Auto-resize textarea on input
   chatInput.addEventListener("input", () => {
     chatInput.style.height = "auto";
     chatInput.style.height = `${Math.min(chatInput.scrollHeight, 80)}px`;
   });
 
+  // Enter to send (Shift+Enter for newline)
   chatInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      chatForm.requestSubmit();
+      sendDirective();
     }
   });
 
-  // Handle Quick Chips
+  // Click Send button
+  btnSend.addEventListener("click", (e) => {
+    e.preventDefault();
+    sendDirective();
+  });
+
+  // Click Quick Chips
   document.addEventListener("click", (e) => {
     const chip = e.target.closest(".chip");
     if (chip && chip.dataset.prompt) {
       chatInput.value = chip.dataset.prompt;
-      chatForm.requestSubmit();
+      sendDirective();
     }
   });
 
@@ -47,14 +54,15 @@
         <div class="msg-bubble bot-bubble">
           <p><strong>FABLE Copilot ready.</strong> What mission directive or webpage action should I perform?</p>
           <div class="quick-chips">
-            <button class="chip" data-prompt="Trigger stage separation on launch console">🚀 Stage Separation</button>
-            <button class="chip" data-prompt="Email flight test results to arnav.goyal0713@gmail.com">📧 Email Flight Report</button>
-            <button class="chip" data-prompt="Recalibrate engine gimbal on launch console">📐 Recalibrate Gimbal</button>
-            <button class="chip" data-prompt="Emergency telemetry hold">⚠️ Emergency Hold</button>
+            <button class="chip" data-prompt="Click the stage separation button">🚀 Stage Separation</button>
+            <button class="chip" data-prompt="Click the send telemetry report button">📧 Send Report</button>
+            <button class="chip" data-prompt="Click the gimbal recalibration button">📐 Gimbal Recal</button>
+            <button class="chip" data-prompt="Scroll down on this page">⬇️ Scroll Down</button>
           </div>
         </div>
       </div>
     `;
+    lastSeenTs = Date.now();
   });
 
   // Stop button
@@ -64,37 +72,54 @@
     appendBotMessage("⏹️ Directive stopped by user.");
   });
 
-  // Submit directive
-  window.handleChatSubmit = async function (e) {
-    if (e) e.preventDefault();
+  async function sendDirective() {
     const promptText = chatInput.value.trim();
     if (!promptText || isExecuting) return;
 
-    // 1. Append user message
+    // 1. Immediately render user message in chat
     appendUserMessage(promptText);
     chatInput.value = "";
     chatInput.style.height = "auto";
 
-    // 2. Set executing state
+    // 2. Set executing state & live action banner
     setExecutingState(true);
-    showActionBanner(`Deploying FABLE Army for: "${promptText.slice(0, 30)}..."`);
+    showActionBanner(`Processing: "${promptText.slice(0, 32)}..."`);
 
     try {
+      // Send directive to background service worker
       const response = await chrome.runtime.sendMessage({
         type: "START_AGENT",
         goal: promptText
       });
 
       if (!response?.ok && response?.error) {
-        appendBotMessage(`❌ Error executing directive: ${response.error}`);
-        setExecutingState(false);
-        return;
+        // Fallback to direct action mode
+        const directResp = await chrome.runtime.sendMessage({
+          type: "DIRECT_ACTION",
+          goal: promptText
+        });
+        if (!directResp?.ok && directResp?.error) {
+          appendBotMessage(`❌ Direct action error: ${directResp.error}`);
+          setExecutingState(false);
+        }
       }
     } catch (err) {
-      appendBotMessage(`❌ Communication error with background runtime: ${err.message}`);
-      setExecutingState(false);
+      // If service worker call failed, attempt direct action
+      try {
+        const directResp = await chrome.runtime.sendMessage({
+          type: "DIRECT_ACTION",
+          goal: promptText
+        });
+        if (!directResp?.ok) {
+          appendBotMessage(`❌ Communication error: ${err.message}`);
+          setExecutingState(false);
+        }
+      } catch (dErr) {
+        appendBotMessage(`❌ Execution failed: ${dErr.message}`);
+        setExecutingState(false);
+      }
     }
-  };
+  }
 
   function appendUserMessage(text) {
     const row = document.createElement("div");
@@ -124,8 +149,21 @@
     row.innerHTML = `
       <div class="msg-avatar">F</div>
       <div class="msg-bubble bot-bubble">
-        <p>${text}</p>
+        <p>${escapeHtml(text)}</p>
         ${cardHtml}
+      </div>
+    `;
+    chatMessages.appendChild(row);
+    scrollToBottom();
+  }
+
+  function appendActionStepMessage(stepText) {
+    const row = document.createElement("div");
+    row.className = "msg-row bot-row";
+    row.innerHTML = `
+      <div class="msg-avatar">⚡</div>
+      <div class="msg-bubble bot-bubble" style="background: #091710; border-color: #173f2b; font-size: 12px;">
+        <span style="color: #00ff88; font-weight: bold;">[ACTION STEP]</span> ${escapeHtml(stepText)}
       </div>
     `;
     chatMessages.appendChild(row);
@@ -137,7 +175,7 @@
     if (executing) {
       btnSend.style.display = "none";
       btnStop.style.display = "flex";
-      agentStatusText.textContent = "Army Executing Directive...";
+      agentStatusText.textContent = "Copilot Executing Directive...";
     } else {
       btnSend.style.display = "flex";
       btnStop.style.display = "none";
@@ -161,10 +199,7 @@
     return div.innerHTML;
   }
 
-  // Poll runtime status and stream execution results to chat
-  let lastActionSeen = "";
-  let lastApprovedCount = 0;
-
+  // Poll background service worker for state & new messages
   async function pollStatus() {
     try {
       const resp = await chrome.runtime.sendMessage({ type: "GET_STATUS" });
@@ -181,23 +216,23 @@
         setExecutingState(false);
       }
 
-      // Check if a new action occurred
-      if (stats.lastAction && stats.lastAction !== lastActionSeen && stats.lastAction !== "idle" && stats.lastAction !== "starting") {
-        lastActionSeen = stats.lastAction;
-        
-        let actionDesc = `Executed MCP browser command: ${stats.lastAction}`;
-        if (stats.lastAction === "click") {
-          actionDesc = `🚀 [MCP PILOT] Successfully clicked element on page`;
+      // Render new messages from chatLog
+      if (Array.isArray(resp.chatLog)) {
+        const newMsgs = resp.chatLog.filter((m) => m.ts > lastSeenTs);
+        for (const msg of newMsgs) {
+          lastSeenTs = Math.max(lastSeenTs, msg.ts);
+          if (msg.role === "user") {
+            // Already rendered locally
+          } else if (msg.role === "action") {
+            appendActionStepMessage(msg.text);
+          } else if (msg.role === "bot") {
+            appendBotMessage(msg.text);
+          }
         }
-        
-        appendBotMessage(`Directive executed successfully.`, {
-          title: `MCP Action: ${stats.lastAction.toUpperCase()}`,
-          desc: `${actionDesc} | Privacy Shield: Clean`
-        });
       }
     } catch (_) {}
   }
 
-  setInterval(pollStatus, 800);
+  setInterval(pollStatus, 500);
   pollStatus();
 })();

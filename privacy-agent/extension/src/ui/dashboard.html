@@ -14,49 +14,47 @@
           <div class="header-info">
             <h2>FABLE <span class="badge-copilot">COPILOT</span></h2>
             <div class="status-indicator">
-              <span class="status-dot"></span>
-              <span id="agent-status-text">Shield Active & Ready</span>
+              <span class="status-dot" id="status-dot"></span>
+              <span id="agent-status-text">Shield Active &amp; Ready</span>
             </div>
           </div>
         </div>
         <div class="header-actions">
-          <button id="btn-clear-chat" title="Clear conversation" class="icon-btn">🗑️</button>
+          <button id="btn-clear-chat" title="Clear conversation" class="icon-btn">&#x1f5d1;</button>
         </div>
       </header>
 
       <!-- Privacy Shield Bar -->
       <div class="shield-status-bar">
         <div class="shield-chip">
-          <span class="shield-icon">🛡️</span>
-          <span>Redaction Shield: <strong id="stat-redacted">0</strong> redacted</span>
+          <span>&#x1f6e1; Redacted: <strong id="stat-redacted">0</strong></span>
         </div>
         <div class="shield-chip">
           <span>Blurred: <strong id="stat-faces">0</strong></span>
         </div>
         <div class="shield-chip">
-          <span>Approved: <strong id="stat-approved">0</strong></span>
+          <span>Actions: <strong id="stat-approved">0</strong></span>
         </div>
       </div>
 
       <!-- Chat Messages Container -->
       <div id="chat-messages" class="chat-messages">
-        <!-- Initial Welcome Message from Fable -->
         <div class="msg-row bot-row">
           <div class="msg-avatar">F</div>
           <div class="msg-bubble bot-bubble">
-            <p><strong>Hello! I am FABLE</strong>, your privacy-first browser copilot & autonomous MCP agent.</p>
-            <p>I can analyze page telemetry, click buttons, fill forms, or dispatch mission reports—all while keeping confidential CAD blueprints and crypto keys completely redacted.</p>
+            <p><strong>Hello! I'm FABLE</strong> &#x2014; your privacy-first browser copilot.</p>
+            <p>I can click buttons, fill forms, navigate pages, and dispatch mission reports. Tell me what to do!</p>
             <div class="quick-chips">
-              <button class="chip" data-prompt="Trigger stage separation on launch console">🚀 Stage Separation</button>
-              <button class="chip" data-prompt="Email flight test results to arnav.goyal0713@gmail.com">📧 Email Flight Report</button>
-              <button class="chip" data-prompt="Recalibrate engine gimbal on launch console">📐 Recalibrate Gimbal</button>
-              <button class="chip" data-prompt="Emergency telemetry hold">⚠️ Emergency Hold</button>
+              <button class="chip" data-prompt="Click the stage separation button">&#x1f680; Stage Separation</button>
+              <button class="chip" data-prompt="Click the send telemetry report button">&#x1f4e7; Send Report</button>
+              <button class="chip" data-prompt="Click the gimbal recalibration button">&#x1f4d0; Gimbal Recal</button>
+              <button class="chip" data-prompt="Scroll down on this page">&#x2b07; Scroll Down</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Live Action Banner (when bot is clicking/acting) -->
+      <!-- Live Action Banner -->
       <div id="live-action-banner" class="live-action-banner" style="display: none;">
         <span class="spinner"></span>
         <span id="action-banner-text">Executing action on webpage...</span>
@@ -64,22 +62,22 @@
 
       <!-- Chat Input Area -->
       <footer class="chat-footer">
-        <form id="chat-form" class="chat-input-form" onsubmit="handleChatSubmit(event)">
+        <div id="chat-form" class="chat-input-form">
           <textarea
             id="chat-input"
             rows="1"
-            placeholder="Ask FABLE to click, type, analyze, or email..."
+            placeholder="Tell FABLE what to do on this page..."
             autocomplete="off"
           ></textarea>
-          <button type="submit" id="btn-send" class="btn-send" title="Send Directive">
+          <button type="button" id="btn-send" class="btn-send" title="Send Directive">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
             </svg>
           </button>
           <button type="button" id="btn-stop" class="btn-stop" title="Stop Agent" style="display: none;">
-            ⏹
+            &#x23f9;
           </button>
-        </form>
+        </div>
       </footer>
     </div>
     <script src="dashboard.js"></script>
