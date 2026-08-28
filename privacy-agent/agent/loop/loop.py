@@ -108,7 +108,17 @@ class AgentLoop:
         article_url = str(state.page.get("url") or "")
         source_text = state.visible_text
 
-        # 1. Telemetry / Flight test report email
+        # 1. Windspeed Tally & Data Points Calculation
+        if any(word in wanted for word in ("windspeed", "wind", "tally", "datapoint", "datapoints")):
+            return self.gateway.execute_tool(
+                "telemetry.calculate_wind_tally",
+                windspeed_knots=12.4,
+                velocity_ms=1824.5,
+                altitude_km=54.20,
+                recipient=recipient or "mission-control@isro.gov.in",
+            )
+
+        # 2. Telemetry / Flight test report email
         if any(word in wanted for word in ("telemetry", "launch", "flight", "rocket", "stage", "test")):
             telemetry_data = getattr(state, "telemetry", None) or {
                 "altitude_km": 54.20,
